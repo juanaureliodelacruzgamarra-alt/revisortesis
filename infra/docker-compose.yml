@@ -1,0 +1,69 @@
+name: kimy
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: kimy-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: kimy
+      POSTGRES_PASSWORD: kimy
+      POSTGRES_DB: kimy
+    ports:
+      - "5433:5432"
+    volumes:
+      - kimy-db-data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kimy -d kimy"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: kimy-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - kimy-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ../apps/api
+      dockerfile: Dockerfile
+    container_name: kimy-api
+    restart: unless-stopped
+    environment:
+      ENVIRONMENT: development
+      DEBUG: "true"
+      DATABASE_URL: postgresql+asyncpg://kimy:kimy@db:5432/kimy
+      REDIS_URL: redis://redis:6379/0
+      CORS_ORIGINS: '["http://localhost:3000"]'
+      JWT_SECRET: dev-secret-change-me
+      ENCRYPTION_KEY: dev-encryption-key-change-me
+    ports:
+      - "8003:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ../apps/api/src:/app/src
+    command: >
+      uvicorn kimy.main:app
+      --host 0.0.0.0
+      --port 8000
+      --reload
+      --reload-dir /app/src
+
+volumes:
+  kimy-db-data:
+  kimy-redis-data:
