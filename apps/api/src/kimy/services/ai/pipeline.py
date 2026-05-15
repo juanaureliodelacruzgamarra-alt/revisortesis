@@ -206,6 +206,26 @@ async def _run_inner(session: AsyncSession, version_id: UUID) -> None:
         duration_ms=duration_ms,
     )
 
+    # Notify the student that their AI review is ready.
+    if submission is not None:
+        from kimy.services.push.sender import PushPayload, notify_user
+
+        await notify_user(
+            submission.student_id,
+            PushPayload(
+                title="Tu revisión IA está lista",
+                body=(
+                    f"{submission.title}: "
+                    f"{draft.total_percentage():.0f}% de cumplimiento."
+                ),
+                data={
+                    "type": "ai_review_ready",
+                    "submission_id": str(submission.id),
+                    "version_id": str(version.id),
+                },
+            ),
+        )
+
 
 def _evaluate(
     *,

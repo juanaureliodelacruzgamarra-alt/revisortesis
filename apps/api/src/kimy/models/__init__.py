@@ -12,6 +12,7 @@ from kimy.models.ai_finding import (
     FindingType,
     HumanAction,
 )
+from kimy.models.audit_log import AuditLog
 from kimy.models.citation import Citation, CitationStatus
 from kimy.models.document_chunk import EMBEDDING_DIM, DocumentChunk
 from kimy.models.fine_tuning_job import FineTuningJob, FineTuningStatus
@@ -40,6 +41,7 @@ __all__ = [
     "AIFinding",
     "AcademicProgram",
     "AdvisorProfile",
+    "AuditLog",
     "Citation",
     "CitationStatus",
     "DEFAULT_AI_MODEL_PREFERENCE",

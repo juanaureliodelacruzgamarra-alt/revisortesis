@@ -58,9 +58,6 @@ jobs:
       - name: Enable pgvector extension + run migrations
         working-directory: apps/api
         run: |
-          # init.sql in infra/db creates the extension on first start of the
-          # docker-compose service. The GHA service container doesn't run init
-          # scripts, so we apply them by hand here.
           PGPASSWORD=kimy psql -h localhost -p 5433 -U kimy -d kimy -f ../../infra/db/init.sql
           uv run alembic upgrade head
 
@@ -73,7 +70,7 @@ jobs:
         working-directory: apps/api
 
   # ---------------------------------------------------------------------------
-  # Web: typecheck + lint (no build — slower, runs on deploy)
+  # Web: typecheck + lint
   # ---------------------------------------------------------------------------
   web:
     name: Web (Next.js)
@@ -90,6 +87,86 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @kimy/web typecheck
       - run: pnpm --filter @kimy/web lint
+
+  # ---------------------------------------------------------------------------
+  # Web E2E: full stack (postgres + API + web) running, Playwright drives Chromium
+  # ---------------------------------------------------------------------------
+  e2e:
+    name: Web E2E (Playwright)
+    runs-on: ubuntu-latest
+    needs: [api, web]
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: kimy
+          POSTGRES_PASSWORD: kimy
+          POSTGRES_DB: kimy
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U kimy -d kimy"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql+asyncpg://kimy:kimy@localhost:5433/kimy
+      RATE_LIMIT_DISABLED: "1"
+      JWT_SECRET: ci-only-secret-change-me-32bytes-min-padding-padding
+      NEXT_PUBLIC_API_URL: http://localhost:8005
+      PLAYWRIGHT_API_BASE: http://localhost:8005
+    steps:
+      - uses: actions/checkout@v4
+
+      # ---- Backend prep ----
+      - uses: astral-sh/setup-uv@v3
+        with:
+          version: "0.11.14"
+          enable-cache: true
+          cache-dependency-glob: "apps/api/uv.lock"
+      - name: Install Python deps
+        run: uv sync
+        working-directory: apps/api
+      - name: Enable pgvector + migrate
+        working-directory: apps/api
+        run: |
+          PGPASSWORD=kimy psql -h localhost -p 5433 -U kimy -d kimy -f ../../infra/db/init.sql
+          uv run alembic upgrade head
+
+      # ---- Web prep ----
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      # ---- Run API in background, then E2E ----
+      - name: Start API
+        working-directory: apps/api
+        run: |
+          uv run uvicorn kimy.main:app --host 0.0.0.0 --port 8005 &
+          for i in {1..30}; do
+            curl -sf http://localhost:8005/health && break || sleep 1
+          done
+
+      - name: Install Playwright browser
+        working-directory: apps/web
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run Playwright
+        working-directory: apps/web
+        run: pnpm exec playwright test --reporter=github
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report/
+          retention-days: 7
 
   # ---------------------------------------------------------------------------
   # Mobile: typecheck only (Expo builds need EAS — out of scope for PR CI)

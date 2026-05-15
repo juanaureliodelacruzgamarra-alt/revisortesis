@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from kimy.api.v1.audit import router as audit_router
 from kimy.api.v1.auth import router as auth_router
 from kimy.api.v1.bulk import router as bulk_router
 from kimy.api.v1.citations import router as citations_router
@@ -26,3 +27,4 @@ router.include_router(orcid_router)
 router.include_router(stats_router)
 router.include_router(fine_tuning_router)
 router.include_router(push_router)
+router.include_router(audit_router)

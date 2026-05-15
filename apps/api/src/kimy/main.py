@@ -7,6 +7,7 @@ from starlette.responses import JSONResponse
 
 from kimy import __version__
 from kimy.api.v1 import router as v1_router
+from kimy.core.audit import AuditMiddleware
 from kimy.core.config import get_settings
 from kimy.core.rate_limit import limiter
 
@@ -58,6 +59,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 
 app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(AuditMiddleware)
 
 app.add_middleware(
     CORSMiddleware,

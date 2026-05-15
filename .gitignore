@@ -58,3 +58,12 @@ next-env.d.ts
 # Claude Code personal settings (per-developer permission allowlists, NOT shared)
 .claude/settings.local.json
 expo-env.d.ts
+
+# Playwright artifacts
+playwright-report/
+test-results/
+playwright/.cache/
+
+# Production secrets — never commit (keep .example as the template)
+infra/.env.prod
+!infra/.env.prod.example
