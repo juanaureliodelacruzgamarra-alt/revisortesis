@@ -23,7 +23,7 @@ class LoginRequest(BaseModel):
 class TokenPair(BaseModel):
     access_token: str
     refresh_token: str
-    token_type: str = "bearer"
+    token_type: str = "bearer"  # noqa: S105 - OAuth2 token type, not a secret
     expires_in: int  # seconds for access_token
 
 
@@ -33,7 +33,7 @@ class RefreshRequest(BaseModel):
 
 class AccessToken(BaseModel):
     access_token: str
-    token_type: str = "bearer"
+    token_type: str = "bearer"  # noqa: S105 - OAuth2 token type, not a secret
     expires_in: int
 
 

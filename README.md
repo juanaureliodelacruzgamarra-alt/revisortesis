@@ -67,8 +67,33 @@ pnpm dev             # Next.js en :3000
 | 2 | Documentos patrón institucionales — upload Word/PDF, extracción heurística de estructura |
 | 3 | Carga y gestión de avances con versionado, descarga proxied con auth |
 | 4 | Pipeline IA: evaluación automática con scores por dimensión, hallazgos accionables, feedback loop del asesor (accept/modify/reject) |
+| 5 | Detección de plagio intra-programa con pgvector (HNSW cosine) |
+| 6 | Validación de citas con CrossRef + clasificación verified/partial/not_found/hallucinated |
+| 7 | ORCID OAuth (real o stub), sync de publicaciones, advisor-fit por similitud temática |
+| 8 | Dashboard de coordinador, KPIs, charts (recharts), acta PDF (reportlab) |
+| 9 | Revisión por lotes (reprocess/set_status/assign_advisor) + reporte CSV comparativo |
+| 10 | Pipeline de fine-tuning: export JSONL, integración OpenAI Fine-Tuning API, toggle A/B |
+| 11 | App móvil con Expo SDK 52: login, mis avances, detalle con findings, perfil, push tokens |
 
-Próximas fases: Plagio con pgvector (5), Validación CrossRef (6), ORCID OAuth (7), Dashboard + reportes (8), Bulk review (9), Fine-tuning (10), Mobile Expo (11).
+## Mobile app
+
+Stack: Expo SDK 52, React Native 0.76, expo-router, expo-notifications, expo-secure-store.
+
+```bash
+# 1. Configura el URL del API que el dispositivo verá
+cp apps/mobile/.env.example apps/mobile/.env
+# edita EXPO_PUBLIC_API_URL según tu setup:
+#   - Android emulator (Studio):  http://10.0.2.2:8005  (default)
+#   - iOS simulator:              http://localhost:8005
+#   - Dispositivo real en Wi-Fi:  http://<LAN-IP>:8005
+
+# 2. Arranca Metro
+pnpm --filter @kimy/mobile start
+
+# 3. Escanea el QR con Expo Go (iOS/Android) o presiona `a` / `i` / `w`
+```
+
+Pantallas: `/login` -> tabs (Inicio · Avances · Perfil) -> detalle de avance con findings agrupados por severidad. Push tokens se registran automáticamente al login (si el dispositivo es físico y otorga permiso).
 
 ## Variables de entorno
 

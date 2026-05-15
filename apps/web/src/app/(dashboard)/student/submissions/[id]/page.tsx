@@ -8,11 +8,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { CitationsPanel } from "@/features/citations/citations-panel";
 import { EvaluationPanel } from "@/features/evaluations/evaluation-panel";
 import { SubmissionStatusBadge } from "@/features/submissions/status-badge";
 import { VersionList } from "@/features/submissions/version-list";
 import { VersionUploader } from "@/features/submissions/version-uploader";
 import { ApiError } from "@/lib/api/client";
+import { fetchCitations } from "@/lib/api/citations";
 import { fetchEvaluation } from "@/lib/api/evaluations";
 import { fetchSubmission } from "@/lib/api/submissions";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -40,9 +42,12 @@ export default async function StudentSubmissionDetail({
   }
 
   const latestVersion = submission.versions[0]; // versions arrive sorted desc
-  const evaluation = latestVersion
-    ? await fetchEvaluation(submission.id, latestVersion.id)
-    : null;
+  const [evaluation, citations] = latestVersion
+    ? await Promise.all([
+        fetchEvaluation(submission.id, latestVersion.id),
+        fetchCitations(submission.id, latestVersion.id),
+      ])
+    : [null, [] as Awaited<ReturnType<typeof fetchCitations>>];
 
   const evaluationEmptyMessage = !latestVersion
     ? "Sube una versión para activar el análisis."
@@ -81,6 +86,11 @@ export default async function StudentSubmissionDetail({
       <EvaluationPanel
         evaluation={evaluation}
         emptyMessage={evaluationEmptyMessage}
+      />
+
+      <CitationsPanel
+        citations={citations}
+        emptyMessage="Aún no se han extraído referencias bibliográficas. Asegúrate de incluir una sección 'Referencias' al final del documento."
       />
 
       <Card>

@@ -27,6 +27,18 @@ config.set_main_option("sqlalchemy.url", get_settings().database_url)
 target_metadata = Base.metadata
 
 
+# Indexes managed manually via raw SQL (pgvector HNSW, anything with custom
+# operator classes) should be invisible to autogenerate, otherwise it tries to
+# drop them on every revision.
+_IGNORED_INDEX_NAMES = {"ix_document_chunks_embedding_hnsw"}
+
+
+def _include_object(object, name, type_, reflected, compare_to) -> bool:
+    if type_ == "index" and name in _IGNORED_INDEX_NAMES:
+        return False
+    return True
+
+
 def run_migrations_offline() -> None:
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
@@ -35,6 +47,7 @@ def run_migrations_offline() -> None:
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
         compare_type=True,
+        include_object=_include_object,
     )
     with context.begin_transaction():
         context.run_migrations()
@@ -45,6 +58,7 @@ def do_run_migrations(connection: Connection) -> None:
         connection=connection,
         target_metadata=target_metadata,
         compare_type=True,
+        include_object=_include_object,
     )
     with context.begin_transaction():
         context.run_migrations()

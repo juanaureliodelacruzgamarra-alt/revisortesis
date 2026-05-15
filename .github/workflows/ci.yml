@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Backend: ruff + pytest against Postgres + pgvector
+  # ---------------------------------------------------------------------------
+  api:
+    name: API (FastAPI)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: kimy
+          POSTGRES_PASSWORD: kimy
+          POSTGRES_DB: kimy
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U kimy -d kimy"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql+asyncpg://kimy:kimy@localhost:5433/kimy
+      RATE_LIMIT_DISABLED: "1"
+      JWT_SECRET: ci-only-secret-change-me-32bytes-min-padding-padding
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "0.11.14"
+          enable-cache: true
+          cache-dependency-glob: "apps/api/uv.lock"
+
+      - name: Set up Python
+        run: uv python install 3.12
+        working-directory: apps/api
+
+      - name: Install dependencies
+        run: uv sync
+        working-directory: apps/api
+
+      - name: Enable pgvector extension + run migrations
+        working-directory: apps/api
+        run: |
+          # init.sql in infra/db creates the extension on first start of the
+          # docker-compose service. The GHA service container doesn't run init
+          # scripts, so we apply them by hand here.
+          PGPASSWORD=kimy psql -h localhost -p 5433 -U kimy -d kimy -f ../../infra/db/init.sql
+          uv run alembic upgrade head
+
+      - name: Ruff
+        run: uv run ruff check src tests
+        working-directory: apps/api
+
+      - name: Pytest
+        run: uv run pytest -q
+        working-directory: apps/api
+
+  # ---------------------------------------------------------------------------
+  # Web: typecheck + lint (no build — slower, runs on deploy)
+  # ---------------------------------------------------------------------------
+  web:
+    name: Web (Next.js)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @kimy/web typecheck
+      - run: pnpm --filter @kimy/web lint
+
+  # ---------------------------------------------------------------------------
+  # Mobile: typecheck only (Expo builds need EAS — out of scope for PR CI)
+  # ---------------------------------------------------------------------------
+  mobile:
+    name: Mobile (Expo)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @kimy/mobile typecheck

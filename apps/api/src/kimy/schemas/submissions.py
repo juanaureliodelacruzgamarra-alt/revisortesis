@@ -59,6 +59,8 @@ class SubmissionSummary(BaseModel):
     created_at: datetime
     latest_version_number: int | None = None  # populated by service
     latest_version_status: VersionParsingStatus | None = None
+    advisor_fit_score: float | None = None
+    advisor_fit_alert: bool = False
 
 
 class SubmissionDetail(SubmissionSummary):

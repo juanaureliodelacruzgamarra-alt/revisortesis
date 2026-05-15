@@ -115,7 +115,13 @@ def can_access(submission: Submission, user: User) -> bool:
 
 
 async def list_for_user(
-    session: AsyncSession, user: User
+    session: AsyncSession,
+    user: User,
+    *,
+    program_id: UUID | None = None,
+    status: SubmissionStatus | None = None,
+    advisor_id: UUID | None = None,
+    fit_alert: bool | None = None,
 ) -> Sequence[Submission]:
     stmt = (
         select(Submission)
@@ -130,7 +136,17 @@ async def list_for_user(
         stmt = stmt.where(Submission.student_id == user.id)
     elif user.role == UserRole.advisor:
         stmt = stmt.where(Submission.advisor_id == user.id)
-    # coordinator / admin see all
+    # coordinator / admin see all (subject to filters)
+
+    if program_id is not None:
+        stmt = stmt.where(Submission.program_id == program_id)
+    if status is not None:
+        stmt = stmt.where(Submission.status == status)
+    if advisor_id is not None:
+        stmt = stmt.where(Submission.advisor_id == advisor_id)
+    if fit_alert is not None:
+        stmt = stmt.where(Submission.advisor_fit_alert.is_(fit_alert))
+
     return (await session.execute(stmt)).scalars().all()
 
 

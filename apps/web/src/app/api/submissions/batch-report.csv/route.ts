@@ -1,0 +1,42 @@
+import { NextResponse, type NextRequest } from "next/server";
+
+import { readAccessToken } from "@/lib/auth/cookies";
+import { API_URL } from "@/lib/env";
+
+export async function GET(req: NextRequest) {
+  const token = await readAccessToken();
+  if (!token) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
+  // Forward all `ids=` query params verbatim.
+  const qs = req.nextUrl.searchParams.toString();
+  if (!qs) {
+    return NextResponse.json({ error: "ids required" }, { status: 400 });
+  }
+
+  const apiRes = await fetch(
+    `${API_URL}/api/v1/submissions/batch-report.csv?${qs}`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    },
+  );
+
+  if (!apiRes.ok || !apiRes.body) {
+    return NextResponse.json(
+      { error: "csv generation failed", status: apiRes.status },
+      { status: apiRes.status },
+    );
+  }
+
+  const headers = new Headers();
+  headers.set(
+    "content-type",
+    apiRes.headers.get("content-type") ?? "text/csv; charset=utf-8",
+  );
+  const disposition = apiRes.headers.get("content-disposition");
+  if (disposition) headers.set("content-disposition", disposition);
+
+  return new NextResponse(apiRes.body, { status: 200, headers });
+}

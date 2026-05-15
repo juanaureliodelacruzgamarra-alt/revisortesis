@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { Badge } from "@/components/ui/badge";
 import {
   FINDING_TYPE_LABELS,
@@ -25,7 +27,7 @@ export function FindingCard({
   children,
 }: {
   finding: AIFinding;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }) {
   const effectiveSeverity =
     finding.human_severity_override ?? finding.severity;

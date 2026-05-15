@@ -4,7 +4,7 @@ import enum
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from sqlalchemy import Enum, ForeignKey, String
+from sqlalchemy import Boolean, Enum, Float, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID as PgUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -61,6 +61,12 @@ class Submission(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         nullable=False,
         default=SubmissionStatus.draft,
         index=True,
+    )
+
+    # ORCID advisor-fit (populated when the advisor is assigned — Phase 7).
+    advisor_fit_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    advisor_fit_alert: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, index=True
     )
 
     student: Mapped[User] = relationship(foreign_keys=[student_id])

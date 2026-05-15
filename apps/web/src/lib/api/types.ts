@@ -137,6 +137,8 @@ export type SubmissionSummary = {
   created_at: string;
   latest_version_number: number | null;
   latest_version_status: VersionParsingStatus | null;
+  advisor_fit_score: number | null;
+  advisor_fit_alert: boolean;
 };
 
 export type SubmissionDetail = SubmissionSummary & {
@@ -213,4 +215,92 @@ export type AIEvaluation = {
   executive_summary: string;
   created_at: string;
   findings: AIFinding[];
+};
+
+// ---- Plagiarism ----
+
+export type PlagiarismSource = "intra" | "copyleaks";
+export type PlagiarismStatus = "pending" | "confirmed" | "dismissed";
+
+export type ChunkPreview = {
+  id: string;
+  chunk_index: number;
+  section: string | null;
+  text: string;
+  char_count: number;
+};
+
+export type PlagiarismMatch = {
+  id: string;
+  similarity: number;
+  source: PlagiarismSource;
+  status: PlagiarismStatus;
+  created_at: string;
+  matched_version_id: string;
+  matched_student_name: string;
+  matched_submission_title: string;
+  source_chunk: ChunkPreview;
+  matched_chunk: ChunkPreview;
+};
+
+// ---- Citations ----
+
+export type CitationStatus =
+  | "pending"
+  | "verified"
+  | "partial"
+  | "not_found"
+  | "hallucinated";
+
+export const CITATION_STATUS_LABELS: Record<CitationStatus, string> = {
+  pending: "Pendiente",
+  verified: "Verificada",
+  partial: "Parcial",
+  not_found: "No encontrada",
+  hallucinated: "Posible invento",
+};
+
+export type Citation = {
+  id: string;
+  raw_text: string;
+  title: string | null;
+  authors: string | null;
+  year: number | null;
+  journal: string | null;
+  doi: string | null;
+  crossref_status: CitationStatus;
+  crossref_message: string | null;
+  checked_at: string | null;
+  created_at: string;
+};
+
+// ---- ORCID ----
+
+export type OrcidAuthorize = {
+  authorize_url: string;
+  state: string;
+  mode: "real" | "stub";
+};
+
+export type OrcidStatus = {
+  linked: boolean;
+  orcid_id: string | null;
+  affiliation: string | null;
+  last_sync: string | null;
+  publications_count: number;
+};
+
+export type OrcidPublication = {
+  id: string;
+  put_code: string;
+  title: string;
+  year: number | null;
+  journal: string | null;
+  doi: string | null;
+  url: string | null;
+  created_at: string;
+};
+
+export type OrcidLinkResult = OrcidStatus & {
+  backend: string;
 };

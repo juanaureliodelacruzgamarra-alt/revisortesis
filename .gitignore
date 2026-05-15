@@ -54,3 +54,7 @@ coverage/
 # Misc
 *.tsbuildinfo
 next-env.d.ts
+
+# Claude Code personal settings (per-developer permission allowlists, NOT shared)
+.claude/settings.local.json
+expo-env.d.ts

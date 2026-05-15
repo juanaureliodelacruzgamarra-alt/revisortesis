@@ -11,6 +11,7 @@ from fastapi import (
     File,
     Form,
     HTTPException,
+    Query,
     UploadFile,
     status,
 )
@@ -52,6 +53,8 @@ def _to_summary(s: Submission) -> SubmissionSummary:
         created_at=s.created_at,
         latest_version_number=latest.version_number if latest else None,
         latest_version_status=latest.parsing_status if latest else None,
+        advisor_fit_score=s.advisor_fit_score,
+        advisor_fit_alert=s.advisor_fit_alert,
     )
 
 
@@ -71,11 +74,56 @@ def _ensure_can_access(submission: Submission, user) -> None:
         )
 
 
+@router.get(
+    "/advisors",
+    response_model=list[dict],
+    dependencies=[Depends(require_roles(UserRole.coordinator, UserRole.admin))],
+)
+async def list_eligible_advisors(session: SessionDep) -> list[dict]:
+    """Lightweight list of advisors for the assignment dropdown."""
+    from sqlalchemy import select
+
+    from kimy.models.advisor_profile import AdvisorProfile
+    from kimy.models.user import User
+
+    stmt = (
+        select(User.id, User.full_name, User.email, AdvisorProfile.orcid_id)
+        .join(AdvisorProfile, AdvisorProfile.user_id == User.id)
+        .where(User.role == UserRole.advisor, User.is_active.is_(True))
+        .order_by(User.full_name)
+    )
+    rows = (await session.execute(stmt)).all()
+    return [
+        {
+            "id": str(r.id),
+            "full_name": r.full_name,
+            "email": r.email,
+            "orcid_id": r.orcid_id,
+            "orcid_linked": r.orcid_id is not None,
+        }
+        for r in rows
+    ]
+
+
 @router.get("", response_model=list[SubmissionSummary])
 async def list_submissions(
-    session: SessionDep, user: CurrentUser
+    session: SessionDep,
+    user: CurrentUser,
+    program_id: Annotated[UUID | None, Query()] = None,
+    status: Annotated[str | None, Query()] = None,
+    advisor_id: Annotated[UUID | None, Query()] = None,
+    fit_alert: Annotated[bool | None, Query()] = None,
 ) -> list[SubmissionSummary]:
-    items = await submissions_service.list_for_user(session, user)
+    from kimy.models.submission import SubmissionStatus
+    parsed_status = SubmissionStatus(status) if status else None
+    items = await submissions_service.list_for_user(
+        session,
+        user,
+        program_id=program_id,
+        status=parsed_status,
+        advisor_id=advisor_id,
+        fit_alert=fit_alert,
+    )
     return [_to_summary(s) for s in items]
 
 
@@ -250,4 +298,122 @@ async def assign_advisor(
     updated = await submissions_service.assign_advisor(
         session, submission=submission, advisor_id=advisor_id
     )
-    return _to_detail(updated)
+    # Recompute ORCID advisor-fit (no-op when advisor has no publications).
+    from kimy.services.orcid import advisor_fit
+    await advisor_fit.update_submission_fit(
+        session, submission_id=updated.id, advisor_id=advisor_id
+    )
+    refreshed = await submissions_service.get_submission(session, updated.id)
+    return _to_detail(refreshed or updated)
+
+
+@router.get("/{submission_id}/report.pdf")
+async def download_acta_pdf(
+    submission_id: UUID,
+    session: SessionDep,
+    user: CurrentUser,
+):
+    """Generate the acta de revisión for the latest version of `submission_id`."""
+    from collections import defaultdict
+
+    from fastapi.responses import Response
+    from sqlalchemy import select
+    from sqlalchemy.orm import selectinload
+
+    from kimy.models.advisor_profile import AdvisorProfile
+    from kimy.models.ai_evaluation import AIEvaluation
+    from kimy.models.citation import Citation
+    from kimy.models.plagiarism_match import PlagiarismMatch
+    from kimy.models.submission_version import SubmissionVersion
+    from kimy.models.user import User
+    from kimy.services.reports import pdf as reports_pdf
+
+    submission = await submissions_service.get_submission(session, submission_id)
+    if submission is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="submission not found"
+        )
+    _ensure_can_access(submission, user)
+
+    latest = submissions_service.latest_version(submission)
+    if latest is None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="submission has no version yet",
+        )
+
+    eval_stmt = (
+        select(AIEvaluation)
+        .options(selectinload(AIEvaluation.findings))
+        .where(AIEvaluation.version_id == latest.id)
+    )
+    evaluation = (await session.execute(eval_stmt)).scalar_one_or_none()
+
+    # Plagiarism — group by matched_version_id.
+    plag_stmt = (
+        select(PlagiarismMatch)
+        .options(
+            selectinload(PlagiarismMatch.matched_version)
+            .selectinload(SubmissionVersion.submission)
+            .selectinload(Submission.student)
+        )
+        .where(PlagiarismMatch.version_id == latest.id)
+    )
+    matches = list((await session.execute(plag_stmt)).scalars().all())
+    grouped: dict[UUID, dict[str, object]] = defaultdict(
+        lambda: {
+            "matched_title": "",
+            "matched_student": "",
+            "best_similarity": 0.0,
+            "chunk_count": 0,
+        }
+    )
+    for m in matches:
+        ms = m.matched_version.submission if m.matched_version else None
+        title = ms.title if ms else ""
+        student = ms.student.full_name if ms and ms.student else ""
+        bucket = grouped[m.matched_version_id]
+        bucket["matched_title"] = title
+        bucket["matched_student"] = student
+        bucket["chunk_count"] = int(bucket["chunk_count"]) + 1
+        if m.similarity > float(bucket["best_similarity"]):
+            bucket["best_similarity"] = m.similarity
+    plagiarism_groups = list(grouped.values())
+
+    # Citation rollup by status.
+    cit_stmt = select(Citation).where(Citation.version_id == latest.id)
+    citations = list((await session.execute(cit_stmt)).scalars().all())
+    citations_summary: dict[str, int] = {}
+    for c in citations:
+        citations_summary[c.crossref_status.value] = (
+            citations_summary.get(c.crossref_status.value, 0) + 1
+        )
+
+    # Advisor name + ORCID (best-effort).
+    advisor_name: str | None = None
+    advisor_orcid: str | None = None
+    if submission.advisor_id:
+        advisor_user = await session.get(User, submission.advisor_id)
+        if advisor_user:
+            advisor_name = advisor_user.full_name
+            profile = await session.get(AdvisorProfile, submission.advisor_id)
+            if profile and profile.orcid_id:
+                advisor_orcid = profile.orcid_id
+
+    pdf_bytes = reports_pdf.render_acta(
+        submission=submission,
+        evaluation=evaluation,
+        advisor_name=advisor_name,
+        advisor_orcid=advisor_orcid,
+        plagiarism_groups=plagiarism_groups,
+        citations_summary=citations_summary,
+        advisor_fit_score=submission.advisor_fit_score,
+    )
+
+    safe_slug = "".join(c if c.isalnum() else "_" for c in submission.title)[:80] or "acta"
+    filename = f"acta_kimy_{safe_slug}.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'inline; filename="{filename}"'},
+    )

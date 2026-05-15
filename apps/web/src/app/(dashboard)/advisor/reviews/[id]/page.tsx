@@ -10,14 +10,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { CitationsPanel } from "@/features/citations/citations-panel";
 import { EvaluationPanel } from "@/features/evaluations/evaluation-panel";
 import { FindingActions } from "@/features/evaluations/finding-actions";
+import { PlagiarismPanel } from "@/features/plagiarism/matches-panel";
 import {
   SubmissionStatusBadge,
   VersionStatusBadge,
 } from "@/features/submissions/status-badge";
 import { ApiError } from "@/lib/api/client";
+import { fetchCitations } from "@/lib/api/citations";
 import { fetchEvaluation } from "@/lib/api/evaluations";
+import { fetchPlagiarismMatches } from "@/lib/api/plagiarism";
 import { fetchSubmission } from "@/lib/api/submissions";
 import { getCurrentUser } from "@/lib/auth/session";
 
@@ -50,9 +54,17 @@ export default async function AdvisorReviewDetail({
   }
 
   const latestVersion = submission.versions[0];
-  const evaluation = latestVersion
-    ? await fetchEvaluation(submission.id, latestVersion.id)
-    : null;
+  const [evaluation, plagiarismMatches, citations] = latestVersion
+    ? await Promise.all([
+        fetchEvaluation(submission.id, latestVersion.id),
+        fetchPlagiarismMatches(submission.id, latestVersion.id),
+        fetchCitations(submission.id, latestVersion.id),
+      ])
+    : [
+        null,
+        [] as Awaited<ReturnType<typeof fetchPlagiarismMatches>>,
+        [] as Awaited<ReturnType<typeof fetchCitations>>,
+      ];
 
   const downloadHref = latestVersion
     ? `/api/submissions/${submission.id}/versions/${latestVersion.id}/file`
@@ -82,14 +94,27 @@ export default async function AdvisorReviewDetail({
             {submission.student.full_name} · {submission.student.email}
           </span>
         </div>
-        <h1 className="text-3xl font-semibold tracking-tight">
-          {submission.title}
-        </h1>
-        {submission.chapter ? (
-          <p className="text-zinc-600 dark:text-zinc-400">
-            {submission.chapter}
-          </p>
-        ) : null}
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-3xl font-semibold tracking-tight">
+              {submission.title}
+            </h1>
+            {submission.chapter ? (
+              <p className="text-zinc-600 dark:text-zinc-400">
+                {submission.chapter}
+              </p>
+            ) : null}
+          </div>
+          <Button asChild variant="outline">
+            <a
+              href={`/api/submissions/${submission.id}/report.pdf`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Descargar acta PDF
+            </a>
+          </Button>
+        </div>
       </header>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -155,6 +180,16 @@ export default async function AdvisorReviewDetail({
           />
         </div>
       </div>
+
+      <PlagiarismPanel
+        matches={plagiarismMatches}
+        emptyMessage="No se detectaron similitudes significativas (≥85%) con otros avances del programa."
+      />
+
+      <CitationsPanel
+        citations={citations}
+        emptyMessage="No se detectaron referencias bibliográficas en el avance (o la sección no se identificó). Asegúrate de incluir una sección 'Referencias' al final."
+      />
     </div>
   );
 }

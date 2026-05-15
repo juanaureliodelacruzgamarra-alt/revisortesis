@@ -11,6 +11,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from kimy.db.base import Base, TimestampMixin
 
 if TYPE_CHECKING:
+    from kimy.models.orcid_publication import OrcidPublication
     from kimy.models.user import User
 
 
@@ -39,3 +40,8 @@ class AdvisorProfile(TimestampMixin, Base):
     )
 
     user: Mapped[User] = relationship(back_populates="advisor_profile")
+    publications: Mapped[list[OrcidPublication]] = relationship(
+        back_populates="advisor",
+        cascade="all, delete-orphan",
+        order_by="OrcidPublication.year.desc()",
+    )

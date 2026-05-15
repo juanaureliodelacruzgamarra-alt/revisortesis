@@ -24,8 +24,9 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://kimy:kimy@localhost:5433/kimy"
     redis_url: str = "redis://localhost:6379/0"
 
-    jwt_secret: str = "change-me-in-prod"
-    encryption_key: str = "change-me-in-prod-32-bytes-base64-fernet="
+    # Minimum 32 bytes for HS256 (RFC 7518 §3.2). Override in production.
+    jwt_secret: str = "dev-only-secret-change-me-32bytes-min-padding-padding"  # noqa: S105
+    encryption_key: str = "change-me-in-prod-32-bytes-base64-fernet="  # noqa: S105
 
     openai_api_key: str | None = None
     anthropic_api_key: str | None = None
@@ -33,6 +34,13 @@ class Settings(BaseSettings):
     orcid_client_id: str | None = None
     orcid_client_secret: str | None = None
     orcid_redirect_uri: str = "http://localhost:3000/orcid/callback"
+    # Use ORCID sandbox by default (sandbox.orcid.org). Set to false for prod.
+    orcid_sandbox: bool = True
+
+    # Cosine similarity below this is flagged as a poor advisor↔thesis match.
+    # 0.35 is calibrated for the hashed-BoW embedder; raise to ~0.50 when running
+    # with OpenAI text-embedding-3-small (which discriminates more sharply).
+    orcid_advisor_fit_threshold: float = 0.35
 
     crossref_user_agent: str = "KIMY/0.1 (mailto:contact@example.com)"
 

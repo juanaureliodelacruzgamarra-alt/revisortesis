@@ -3,9 +3,10 @@ from __future__ import annotations
 from uuid import UUID
 
 import jwt
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Request, status
 
 from kimy.core.deps import CurrentUser, SessionDep
+from kimy.core.rate_limit import LIMIT_LOGIN, LIMIT_REFRESH, LIMIT_REGISTER, limiter
 from kimy.core.security import (
     ACCESS_TOKEN_TTL_MIN,
     create_access_token,
@@ -38,7 +39,10 @@ def _token_pair(user_id: UUID, role: str) -> TokenPair:
     response_model=TokenPair,
     status_code=status.HTTP_201_CREATED,
 )
-async def register(payload: RegisterRequest, session: SessionDep) -> TokenPair:
+@limiter.limit(LIMIT_REGISTER)
+async def register(
+    request: Request, payload: RegisterRequest, session: SessionDep
+) -> TokenPair:
     try:
         user = await users_service.create_user(
             session,
@@ -56,7 +60,10 @@ async def register(payload: RegisterRequest, session: SessionDep) -> TokenPair:
 
 
 @router.post("/login", response_model=TokenPair)
-async def login(payload: LoginRequest, session: SessionDep) -> TokenPair:
+@limiter.limit(LIMIT_LOGIN)
+async def login(
+    request: Request, payload: LoginRequest, session: SessionDep
+) -> TokenPair:
     try:
         user = await users_service.authenticate(
             session, email=payload.email, password=payload.password
@@ -75,7 +82,10 @@ async def login(payload: LoginRequest, session: SessionDep) -> TokenPair:
 
 
 @router.post("/refresh", response_model=AccessToken)
-async def refresh(payload: RefreshRequest, session: SessionDep) -> AccessToken:
+@limiter.limit(LIMIT_REFRESH)
+async def refresh(
+    request: Request, payload: RefreshRequest, session: SessionDep
+) -> AccessToken:
     try:
         decoded = decode_token(payload.refresh_token, expected_type="refresh")
         user_id = UUID(decoded["sub"])

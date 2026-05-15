@@ -26,6 +26,10 @@ dependencies = [
     "python-docx>=1.1.2",
     "pypdf>=5.1.0",
     "python-multipart>=0.0.20",
+    # PDF generation (acta de revisión)
+    "reportlab>=4.2.0",
+    # Rate limiting (Fase 12)
+    "slowapi>=0.1.9",
 ]
 
 [project.optional-dependencies]
@@ -57,12 +61,21 @@ build-backend = "hatchling.build"
 packages = ["src/kimy"]
 
 [tool.ruff]
-line-length = 100
+line-length = 110
 target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "N", "S", "A", "C4", "PT", "RET", "SIM"]
-ignore = ["S101", "B008"]
+ignore = [
+    "S101",  # `assert` is the heart of pytest
+    "B008",  # FastAPI `Depends(...)` is the canonical default-arg pattern
+    "N811",  # `from pgvector...sqlalchemy import UUID as PgUUID` is intentional disambiguation
+    "E501",  # long lines tolerated — docstrings + raw SQL get noisy fast
+    "UP042", # `(str, Enum)` is still valid pre-StrEnum idiom we want to keep for now
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S105", "S106", "S107"]  # test passwords are not secrets
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

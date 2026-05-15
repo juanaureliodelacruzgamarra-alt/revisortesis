@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -82,7 +82,7 @@ export function EvaluationPanel({
             <div className="space-y-3">
               {items.map((f) => (
                 <FindingCard key={f.id} finding={f}>
-                  {renderFindingExtra?.(f)}
+                  {renderFindingExtra ? renderFindingExtra(f) : null}
                 </FindingCard>
               ))}
             </div>

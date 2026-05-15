@@ -182,7 +182,7 @@ def evaluate(
 
     # Executive summary (templated).
     summary_lines = [
-        f"Avance evaluado por el módulo heurístico KIMY (sin LLM activo, v1).",
+        "Avance evaluado por el módulo heurístico KIMY (sin LLM activo, v1).",
         f"Cumplimiento estructural: {structure_score:.0f}/100 — "
         f"{len(missing)} secciones obligatorias faltantes de {len(expected)}.",
         f"Contenido: {content_score:.0f}/100. Forma: {form_score:.0f}/100. "

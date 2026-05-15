@@ -39,8 +39,14 @@ def evaluate(
     submission_chapter: str | None,
     submission_structure: dict[str, Any] | None,
     submission_text: str,
+    openai_model_override: str | None = None,
 ) -> tuple[AIEvaluationDraft, str, str]:
-    """Return (draft, backend_name, model_name) using the first LLM that works."""
+    """Return (draft, backend_name, model_name) using the first LLM that works.
+
+    ``openai_model_override`` lets the caller swap the OpenAI model at request
+    time — used by the pipeline to honour the admin's ``ai.model_preference``
+    setting (e.g., a fine-tuned ``ft:gpt-4o-mini-2024-…`` id).
+    """
     settings = get_settings()
     user_prompt = prompts.build_user_prompt(
         template_title=template_title,
@@ -51,10 +57,16 @@ def evaluate(
         submission_text=submission_text,
     )
 
+    openai_model = openai_model_override or _OPENAI_MODEL
     if settings.openai_api_key:
         try:
-            raw = _call_openai(prompts.system_prompt(), user_prompt, settings.openai_api_key)
-            return _parse(raw), "openai", _OPENAI_MODEL
+            raw = _call_openai(
+                prompts.system_prompt(),
+                user_prompt,
+                settings.openai_api_key,
+                model=openai_model,
+            )
+            return _parse(raw), "openai", openai_model
         except (LLMResponseError, ValidationError) as exc:
             logger.warning("openai response unusable, falling through: %s", exc)
         except Exception:
@@ -82,7 +94,7 @@ def _parse(raw_json: str) -> AIEvaluationDraft:
     return AIEvaluationDraft.model_validate(payload)
 
 
-def _call_openai(system: str, user: str, api_key: str) -> str:
+def _call_openai(system: str, user: str, api_key: str, *, model: str = _OPENAI_MODEL) -> str:
     try:
         from openai import OpenAI
     except ImportError as exc:
@@ -90,7 +102,7 @@ def _call_openai(system: str, user: str, api_key: str) -> str:
 
     client = OpenAI(api_key=api_key)
     completion = client.chat.completions.create(
-        model=_OPENAI_MODEL,
+        model=model,
         response_format={"type": "json_object"},
         temperature=0.2,
         messages=[

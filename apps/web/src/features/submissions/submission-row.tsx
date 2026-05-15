@@ -31,6 +31,15 @@ export function SubmissionRow({
               <Badge variant="muted">v{submission.latest_version_number}</Badge>
             ) : null}
             <Badge variant="outline">[{submission.program.code}]</Badge>
+            {submission.advisor_fit_alert ? (
+              <Badge variant="destructive" title="La afinidad temática asesor↔tesis es baja">
+                ORCID fit {((submission.advisor_fit_score ?? 0) * 100).toFixed(0)}%
+              </Badge>
+            ) : submission.advisor_fit_score !== null ? (
+              <Badge variant="success" title="Buena afinidad asesor↔tesis">
+                ORCID fit {(submission.advisor_fit_score * 100).toFixed(0)}%
+              </Badge>
+            ) : null}
           </div>
           <Link
             href={`${basePath}/${submission.id}`}
