@@ -10,7 +10,7 @@ def test_health_returns_ok():
     assert response.status_code == 200
     body = response.json()
     assert body["status"] == "ok"
-    assert body["service"] == "KIMY API"
+    assert body["service"] == "Aurelio API"
     assert "version" in body
 
 
@@ -18,5 +18,5 @@ def test_root_returns_service_metadata():
     response = client.get("/")
     assert response.status_code == 200
     body = response.json()
-    assert body["service"] == "KIMY API"
+    assert body["service"] == "Aurelio API"
     assert body["docs"] == "/docs"

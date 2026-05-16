@@ -1,13 +1,15 @@
-"""Embedder with two backends.
+"""Embedder — hashed bag-of-words.
 
-Both produce L2-normalized vectors of dimension EMBEDDING_DIM so they can be
-compared with cosine similarity via pgvector's `<=>` operator.
+Produces L2-normalized 1536-dim vectors compatible with the pgvector column.
+Tokenizes lowercased words, drops Spanish stopwords, hashes each token to a
+position in the vector. Two near-duplicate texts produce highly similar
+vectors; cosine similarity ≥ 0.85 is achievable for verbatim copies.
 
-1. OpenAI text-embedding-3-small (1536 dims) — when OPENAI_API_KEY is set.
-2. Hashed bag-of-words fallback — pure Python, deterministic, no API call.
-   Tokenizes lowercased words, drops Spanish stopwords, hashes each token to a
-   position in a 1536-dim vector. Two near-duplicate texts produce highly
-   similar vectors; cosine similarity ≥ 0.85 is achievable for verbatim copies.
+Note: this used to delegate to OpenAI text-embedding-3-small when an API key
+was set. After the migration to Gemini we removed that path because Gemini's
+embedding models output 768 dimensions and the DB column is fixed at 1536.
+Switching dimensions would require an Alembic migration that wipes existing
+chunk embeddings — out of scope for this rebrand.
 """
 from __future__ import annotations
 
@@ -17,7 +19,6 @@ import math
 import re
 from collections import Counter
 
-from kimy.core.config import get_settings
 from kimy.models.document_chunk import EMBEDDING_DIM
 
 logger = logging.getLogger(__name__)
@@ -82,28 +83,8 @@ def _hashed_bow(text: str) -> list[float]:
     return [x / norm for x in vec]
 
 
-def _openai_embed(texts: list[str], api_key: str) -> list[list[float]]:
-    from openai import OpenAI
-
-    client = OpenAI(api_key=api_key)
-    resp = client.embeddings.create(
-        model="text-embedding-3-small",
-        input=texts,
-    )
-    return [d.embedding for d in resp.data]
-
-
 def embed_texts(texts: list[str]) -> tuple[list[list[float]], str]:
     """Embed a batch of texts. Returns (vectors, backend_name)."""
     if not texts:
         return [], "none"
-
-    settings = get_settings()
-    if settings.openai_api_key:
-        try:
-            vectors = _openai_embed(texts, settings.openai_api_key)
-            return vectors, "openai:text-embedding-3-small"
-        except Exception:
-            logger.exception("openai embeddings failed — falling back to hashed-bow")
-
     return [_hashed_bow(t) for t in texts], "hashed-bow:v1"

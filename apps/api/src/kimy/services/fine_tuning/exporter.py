@@ -34,7 +34,7 @@ from kimy.models.submission_version import SubmissionVersion
 from kimy.services import storage
 
 _SYSTEM_PROMPT = (
-    "Eres KIMY, un evaluador académico de tesis. Tu tarea: para el hallazgo "
+    "Eres Aurelio, un evaluador académico de tesis. Tu tarea: para el hallazgo "
     "descrito por el usuario, devolver UN ÚNICO objeto JSON con la severidad "
     "final (critical|major|minor|suggestion), la descripción corregida y, si "
     "corresponde, la instrucción de corrección. Si el hallazgo no debe "

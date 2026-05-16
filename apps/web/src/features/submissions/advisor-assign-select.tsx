@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useTransition } from "react";
 
@@ -28,7 +28,7 @@ export function AdvisorAssignSelect({
       value={currentAdvisorId ?? ""}
       onChange={onChange}
       disabled={pending}
-      className="flex h-9 min-w-[14rem] rounded-md border border-zinc-200 bg-white px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-950 dark:focus-visible:ring-zinc-300"
+      className="flex h-9 min-w-[14rem] rounded-md border border-zinc-200 bg-white px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:opacity-50 dark:border-[color:rgba(196,181,253,0.12)] dark:bg-[rgba(11,14,42,0.55)] dark:focus-visible:ring-violet-500/40"
     >
       <option value="">— Sin asignar —</option>
       {advisors.map((a) => (

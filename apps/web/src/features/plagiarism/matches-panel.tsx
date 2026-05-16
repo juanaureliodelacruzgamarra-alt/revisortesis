@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge";
+﻿import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -80,12 +80,12 @@ export function PlagiarismPanel({
         {groups.map((g) => (
           <div
             key={g.matched_version_id}
-            className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800"
+            className="rounded-lg border border-zinc-200 p-4 dark:border-[color:rgba(196,181,253,0.12)]"
           >
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <p className="text-sm font-medium">
                 {g.matched_student_name} —{" "}
-                <span className="text-zinc-600 dark:text-zinc-400">
+                <span className="text-zinc-600 dark:text-[color:var(--aurora-cream-dim)]">
                   {g.matched_submission_title}
                 </span>
               </p>
@@ -102,7 +102,7 @@ export function PlagiarismPanel({
               {g.items.map((m) => (
                 <li
                   key={m.id}
-                  className="rounded-md bg-zinc-50 p-3 text-sm dark:bg-zinc-900/60"
+                  className="rounded-md bg-zinc-50 p-3 text-sm dark:bg-[rgba(20,22,62,0.55)]/60"
                 >
                   <div className="flex items-center justify-between">
                     <Badge variant={similarityVariant(m.similarity)}>
@@ -119,7 +119,7 @@ export function PlagiarismPanel({
                       <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Fragmento del avance
                       </p>
-                      <p className="mt-1 line-clamp-6 text-zinc-700 dark:text-zinc-300">
+                      <p className="mt-1 line-clamp-6 text-zinc-700 dark:text-[color:var(--aurora-cream-dim)]">
                         {m.source_chunk.text}
                       </p>
                     </div>
@@ -127,7 +127,7 @@ export function PlagiarismPanel({
                       <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Fragmento similar
                       </p>
-                      <p className="mt-1 line-clamp-6 text-zinc-700 dark:text-zinc-300">
+                      <p className="mt-1 line-clamp-6 text-zinc-700 dark:text-[color:var(--aurora-cream-dim)]">
                         {m.matched_chunk.text}
                       </p>
                     </div>

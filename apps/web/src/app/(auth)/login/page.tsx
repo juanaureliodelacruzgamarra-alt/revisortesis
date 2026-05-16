@@ -1,42 +1,48 @@
 import Link from "next/link";
 
+import { AuthSplit } from "@/features/auth/auth-split";
 import { LoginForm } from "@/features/auth/login-form";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 export const metadata = {
-  title: "Iniciar sesión · KIMY",
+  title: "Iniciar sesión · Aurelio",
 };
 
 export default function LoginPage() {
   return (
-    <Card>
-      <CardHeader className="space-y-1">
-        <p className="text-xs font-medium uppercase tracking-widest text-zinc-500">
-          Sistema KIMY
-        </p>
-        <CardTitle>Iniciar sesión</CardTitle>
-        <CardDescription>
-          Accede con tu correo institucional y contraseña.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <LoginForm />
-        <p className="text-center text-sm text-zinc-500">
+    <AuthSplit
+      pill="Revisión académica con IA"
+      title={
+        <>
+          PENSAR. <span className="aurora-gradient-text">ESCRIBIR.</span>
+          <br />
+          SUSTENTAR.
+        </>
+      }
+      description={
+        <>
+          La plataforma donde la <strong className="text-[color:var(--aurora-cream)]">inteligencia artificial institucional</strong>,
+          la validación de citas y la revisión de tu asesor convergen en una sola sesión de trabajo.
+        </>
+      }
+      highlights={[
+        { label: "Hallazgos IA", value: "6 capas" },
+        { label: "Citas verificadas", value: "CrossRef" },
+        { label: "Asesores", value: "ORCID" },
+      ]}
+      formTitle="Iniciar sesión"
+      formDescription="Usa tu correo institucional UNT y la contraseña que te entregó la coordinación."
+      formChildren={<LoginForm />}
+      formFooter={
+        <>
           ¿No tienes cuenta?{" "}
           <Link
             href="/register"
-            className="font-medium text-zinc-900 underline-offset-4 hover:underline dark:text-zinc-100"
+            className="font-medium text-[color:var(--aurora-primary-soft)] underline-offset-4 hover:underline"
           >
             Crear una
           </Link>
-        </p>
-      </CardContent>
-    </Card>
+        </>
+      }
+    />
   );
 }

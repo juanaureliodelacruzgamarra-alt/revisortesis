@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 
 import {
   Card,
@@ -11,7 +11,7 @@ import { SubmissionRow } from "@/features/submissions/submission-row";
 import { fetchSubmissions } from "@/lib/api/submissions";
 import { getCurrentUser } from "@/lib/auth/session";
 
-export const metadata = { title: "Revisiones · KIMY" };
+export const metadata = { title: "Revisiones · Aurelio" };
 
 export default async function AdvisorReviewsPage() {
   const user = await getCurrentUser();
@@ -27,7 +27,7 @@ export default async function AdvisorReviewsPage() {
           Asesor
         </p>
         <h1 className="text-3xl font-semibold tracking-tight">Mis revisiones</h1>
-        <p className="text-zinc-600 dark:text-zinc-400">
+        <p className="text-zinc-600 dark:text-[color:var(--aurora-cream-dim)]">
           Avances asignados a tu cuenta. La pantalla de revisión lado-a-lado y
           la validación de hallazgos IA llegarán en la Fase 4.
         </p>

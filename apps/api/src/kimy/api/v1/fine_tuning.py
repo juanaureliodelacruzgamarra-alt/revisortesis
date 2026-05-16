@@ -51,15 +51,15 @@ async def _threshold(session: AsyncSession) -> int:
 async def stats(session: SessionDep) -> FineTuningStats:
     s = await ft_exporter.compute_stats(session)
     threshold = await _threshold(session)
-    openai_ok = ft_submitter.is_available()
+    provider_ok = ft_submitter.is_available()
     return FineTuningStats(
         total_eligible=s.total_eligible,
         by_action=s.by_action,
         by_severity=s.by_severity,
         min_examples_threshold=threshold,
         ready_to_export=s.total_eligible > 0,
-        ready_to_submit=s.total_eligible >= threshold and openai_ok,
-        openai_available=openai_ok,
+        ready_to_submit=s.total_eligible >= threshold and provider_ok,
+        provider_available=provider_ok,
     )
 
 
@@ -89,7 +89,7 @@ async def create_job(session: SessionDep, user: CurrentUser) -> FineTuningJobOut
         )
     relpath = await ft_exporter.persist_dataset(text)
     pref = await settings_service.get(session, KEY_AI_MODEL_PREFERENCE)
-    base_model = str(pref.get("openai_model") or "gpt-4o-mini")
+    base_model = str(pref.get("model") or "gemini-2.0-flash")
 
     job = FineTuningJob(
         status=FineTuningStatus.dataset_ready,
@@ -240,8 +240,10 @@ async def set_active_model(
     user: CurrentUser,
 ) -> ModelPreference:
     cfg = await settings_service.get(session, KEY_AI_MODEL_PREFERENCE)
-    if payload.openai_model is not None:
-        cfg["openai_model"] = payload.openai_model
+    if payload.provider is not None:
+        cfg["provider"] = payload.provider
+    if payload.model is not None:
+        cfg["model"] = payload.model
     if payload.fine_tuned_model is not None:
         cfg["fine_tuned_model"] = payload.fine_tuned_model or None
     if payload.use_fine_tuned is not None:

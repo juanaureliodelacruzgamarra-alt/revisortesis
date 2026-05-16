@@ -12,7 +12,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    app_name: str = "KIMY API"
+    app_name: str = "Aurelio API"
     app_version: str = "0.1.0"
     environment: str = Field(default="development")
     debug: bool = True
@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     jwt_secret: str = "dev-only-secret-change-me-32bytes-min-padding-padding"  # noqa: S105
     encryption_key: str = "change-me-in-prod-32-bytes-base64-fernet="  # noqa: S105
 
+    # Primary LLM provider: Google Gemini (via google-genai SDK).
+    gemini_api_key: str | None = None
+    # Legacy / fallback LLM providers — optional.
     openai_api_key: str | None = None
     anthropic_api_key: str | None = None
 
@@ -42,7 +45,7 @@ class Settings(BaseSettings):
     # with OpenAI text-embedding-3-small (which discriminates more sharply).
     orcid_advisor_fit_threshold: float = 0.35
 
-    crossref_user_agent: str = "KIMY/0.1 (mailto:contact@example.com)"
+    crossref_user_agent: str = "Aurelio/0.1 (mailto:contact@example.com)"
 
     storage_backend: str = "local"
     storage_path: str = "./storage"

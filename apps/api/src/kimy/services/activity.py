@@ -95,7 +95,7 @@ async def recent(
                 occurred_at=ev.created_at,
                 submission_id=str(s.id),
                 submission_title=s.title,
-                actor_name=f"KIMY ({ev.backend})",
+                actor_name=f"Aurelio ({ev.backend})",
                 description=(
                     f"Evaluación IA completada — {ev.total_percentage:.0f}% / "
                     f"{ev.decimal_grade:.1f}/20 — {len(ev.findings) if False else ''}"

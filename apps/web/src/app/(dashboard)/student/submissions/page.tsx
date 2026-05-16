@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import { SubmissionRow } from "@/features/submissions/submission-row";
 import { fetchSubmissions } from "@/lib/api/submissions";
 import { getCurrentUser } from "@/lib/auth/session";
 
-export const metadata = { title: "Mis avances · KIMY" };
+export const metadata = { title: "Mis avances · Aurelio" };
 
 export default async function StudentSubmissionsPage() {
   const user = await getCurrentUser();
@@ -30,7 +30,7 @@ export default async function StudentSubmissionsPage() {
             Estudiante
           </p>
           <h1 className="text-3xl font-semibold tracking-tight">Mis avances</h1>
-          <p className="text-zinc-600 dark:text-zinc-400">
+          <p className="text-zinc-600 dark:text-[color:var(--aurora-cream-dim)]">
             Crea un avance y sube las versiones (.docx o .pdf) que quieras
             revisar.
           </p>

@@ -1,7 +1,7 @@
 """Reference extractor.
 
 Two strategies, tried in order:
-1. LLM (OpenAI gpt-4o-mini in JSON mode) when OPENAI_API_KEY is set — best quality.
+1. LLM (Google Gemini in JSON mode) when GEMINI_API_KEY is set — best quality.
 2. Regex over the trailing "References" / "Bibliografía" / "Referencias bibliográficas"
    section. Lower recall but works with no API key.
 
@@ -159,20 +159,24 @@ FORMATO:
 """
 
 
-def _call_openai(section_text: str, api_key: str) -> list[ParsedReference]:
-    from openai import OpenAI
+_GEMINI_MODEL = "gemini-2.0-flash"
 
-    client = OpenAI(api_key=api_key)
-    resp = client.chat.completions.create(
-        model="gpt-4o-mini",
-        response_format={"type": "json_object"},
-        temperature=0,
-        messages=[
-            {"role": "system", "content": _LLM_SYSTEM_PROMPT},
-            {"role": "user", "content": f"Sección de referencias:\n\n{section_text[:20000]}"},
-        ],
+
+def _call_gemini(section_text: str, api_key: str) -> list[ParsedReference]:
+    from google import genai
+    from google.genai import types as genai_types
+
+    client = genai.Client(api_key=api_key)
+    resp = client.models.generate_content(
+        model=_GEMINI_MODEL,
+        contents=f"Sección de referencias:\n\n{section_text[:20000]}",
+        config=genai_types.GenerateContentConfig(
+            system_instruction=_LLM_SYSTEM_PROMPT,
+            response_mime_type="application/json",
+            temperature=0,
+        ),
     )
-    content = resp.choices[0].message.content or ""
+    content = getattr(resp, "text", None) or ""
     payload = json.loads(content)
     parsed = _LLMOutput.model_validate(payload)
     return [
@@ -193,14 +197,14 @@ def extract_references(full_text: str) -> tuple[list[ParsedReference], str]:
     settings = get_settings()
     section = _slice_references_section(full_text)
 
-    if settings.openai_api_key and len(section) > 50:
+    if settings.gemini_api_key and len(section) > 50:
         try:
-            refs = _call_openai(section, settings.openai_api_key)
+            refs = _call_gemini(section, settings.gemini_api_key)
             if refs:
-                return refs, "openai:gpt-4o-mini"
+                return refs, f"gemini:{_GEMINI_MODEL}"
         except (json.JSONDecodeError, ValidationError) as exc:
-            logger.warning("openai reference extraction unusable: %s", exc)
+            logger.warning("gemini reference extraction unusable: %s", exc)
         except Exception:
-            logger.exception("openai reference extraction failed — using regex")
+            logger.exception("gemini reference extraction failed — using regex")
 
     return _regex_extract(full_text), "regex"

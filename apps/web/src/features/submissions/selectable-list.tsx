@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -69,8 +69,8 @@ export function SelectableSubmissionsList({
               key={s.id}
               className={`rounded-lg border p-4 transition-colors ${
                 checked
-                  ? "border-zinc-900 bg-zinc-50 dark:border-zinc-50 dark:bg-zinc-900"
-                  : "border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950"
+                  ? "border-zinc-900 bg-zinc-50 dark:border-zinc-50 dark:bg-[rgba(20,22,62,0.55)]"
+                  : "border-zinc-200 bg-white dark:border-[color:rgba(196,181,253,0.12)] dark:bg-[rgba(11,14,42,0.55)]"
               }`}
             >
               <div className="flex flex-wrap items-start gap-3">
@@ -129,7 +129,7 @@ export function SelectableSubmissionsList({
                     href={`/api/submissions/${s.id}/report.pdf`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs font-medium text-zinc-900 underline-offset-4 hover:underline dark:text-zinc-100"
+                    className="text-xs font-medium text-zinc-900 underline-offset-4 hover:underline dark:text-[color:var(--aurora-cream)]"
                   >
                     Descargar acta PDF →
                   </a>

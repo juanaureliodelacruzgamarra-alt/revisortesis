@@ -37,9 +37,10 @@ class SystemSetting(Base):
 # know what JSON shape to write.
 KEY_AI_MODEL_PREFERENCE = "ai.model_preference"
 DEFAULT_AI_MODEL_PREFERENCE: dict[str, Any] = {
-    "openai_model": "gpt-4o-mini",
-    "fine_tuned_model": None,        # set after a successful FT job
-    "use_fine_tuned": False,         # A/B switch
+    "provider": "gemini",                # "gemini" (primary) | "anthropic" (legacy)
+    "model": "gemini-2.0-flash",         # active model for the chosen provider
+    "fine_tuned_model": None,            # reserved — Gemini tuning not wired
+    "use_fine_tuned": False,             # A/B switch (kept for forward compat)
 }
 
 KEY_FINE_TUNING_CONFIG = "ai.fine_tuning"

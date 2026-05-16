@@ -11,8 +11,15 @@ import {
   type ModelPreference,
 } from "@/lib/api/fine-tuning";
 
+const GEMINI_MODELS = [
+  "gemini-2.0-flash",
+  "gemini-2.0-flash-lite",
+  "gemini-1.5-pro",
+  "gemini-1.5-flash",
+];
+
 export function ModelToggle({ pref }: { pref: ModelPreference }) {
-  const [openaiModel, setOpenaiModel] = useState(pref.openai_model);
+  const [model, setModel] = useState(pref.model);
   const [fineTunedModel, setFineTunedModel] = useState(
     pref.fine_tuned_model ?? "",
   );
@@ -26,7 +33,7 @@ export function ModelToggle({ pref }: { pref: ModelPreference }) {
     setOk(false);
     start(async () => {
       const result = await updateModelPreferenceAction({
-        openai_model: openaiModel,
+        model,
         fine_tuned_model: fineTunedModel || null,
         use_fine_tuned: useFineTuned,
       });
@@ -35,42 +42,55 @@ export function ModelToggle({ pref }: { pref: ModelPreference }) {
     });
   }
 
+  const activeModel =
+    pref.use_fine_tuned && pref.fine_tuned_model
+      ? pref.fine_tuned_model
+      : pref.model;
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2">
         <Badge variant={pref.use_fine_tuned ? "success" : "muted"}>
-          Activo:{" "}
-          {pref.use_fine_tuned && pref.fine_tuned_model
-            ? pref.fine_tuned_model
-            : pref.openai_model}
+          Activo: {activeModel}
         </Badge>
+        <Badge variant="outline">proveedor: {pref.provider}</Badge>
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="space-y-1">
-          <Label htmlFor="base-model">Modelo base</Label>
-          <Input
-            id="base-model"
-            value={openaiModel}
-            onChange={(e) => setOpenaiModel(e.target.value)}
+          <Label htmlFor="gemini-model">Modelo Gemini</Label>
+          <input
+            id="gemini-model"
+            list="gemini-model-list"
+            value={model}
+            onChange={(e) => setModel(e.target.value)}
+            className="aurora-input flex h-10 w-full rounded-md px-3 text-sm"
+            placeholder="gemini-2.0-flash"
           />
-          <p className="text-xs text-zinc-500">Ej: gpt-4o-mini</p>
+          <datalist id="gemini-model-list">
+            {GEMINI_MODELS.map((m) => (
+              <option key={m} value={m} />
+            ))}
+          </datalist>
+          <p className="text-xs text-zinc-500 dark:text-[color:var(--aurora-cream-dim)]">
+            Configura GEMINI_API_KEY en apps/api/.env. Por defecto: gemini-2.0-flash.
+          </p>
         </div>
         <div className="space-y-1">
-          <Label htmlFor="ft-model">Modelo fine-tuneado</Label>
+          <Label htmlFor="ft-model">Modelo fine-tuneado (opcional)</Label>
           <Input
             id="ft-model"
             value={fineTunedModel}
             onChange={(e) => setFineTunedModel(e.target.value)}
-            placeholder="ft:gpt-4o-mini-2024-…"
+            placeholder="tunedModels/…"
           />
-          <p className="text-xs text-zinc-500">
-            ID devuelto por OpenAI cuando un job termina en estado succeeded.
+          <p className="text-xs text-zinc-500 dark:text-[color:var(--aurora-cream-dim)]">
+            ID de un modelo tuneado en Vertex AI / Gemini Tuning. Déjalo vacío si no aplica.
           </p>
         </div>
       </div>
 
-      <label className="inline-flex items-center gap-2 text-sm">
+      <label className="inline-flex items-center gap-2 text-sm dark:text-[color:var(--aurora-cream)]">
         <input
           type="checkbox"
           checked={useFineTuned}
@@ -79,17 +99,17 @@ export function ModelToggle({ pref }: { pref: ModelPreference }) {
         Usar modelo fine-tuneado para nuevas evaluaciones (A/B)
       </label>
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <Button type="button" onClick={save} disabled={pending}>
           {pending ? "Guardando…" : "Guardar"}
         </Button>
         {ok ? (
-          <span className="text-xs text-emerald-600 dark:text-emerald-400">
+          <span className="text-xs text-emerald-600 dark:text-emerald-300">
             Guardado.
           </span>
         ) : null}
         {error ? (
-          <span className="text-xs text-rose-600 dark:text-rose-400">
+          <span className="text-xs text-rose-600 dark:text-rose-300">
             {error}
           </span>
         ) : null}

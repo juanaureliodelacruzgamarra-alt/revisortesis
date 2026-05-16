@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+﻿import type { ReactNode } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -33,14 +33,14 @@ export function FindingCard({
     finding.human_severity_override ?? finding.severity;
 
   return (
-    <article className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
+    <article className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-[color:rgba(196,181,253,0.12)] dark:bg-[rgba(11,14,42,0.55)]">
       <header className="flex flex-wrap items-center gap-2">
         <Badge variant={severityVariant(effectiveSeverity)}>
           {SEVERITY_LABELS[effectiveSeverity]}
         </Badge>
         <Badge variant="outline">{FINDING_TYPE_LABELS[finding.type]}</Badge>
         {finding.section ? (
-          <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
+          <span className="text-xs font-medium text-zinc-600 dark:text-[color:var(--aurora-cream-dim)]">
             {finding.section}
           </span>
         ) : null}
@@ -60,7 +60,7 @@ export function FindingCard({
         ) : null}
       </header>
 
-      <p className="mt-3 text-sm text-zinc-900 dark:text-zinc-100">
+      <p className="mt-3 text-sm text-zinc-900 dark:text-[color:var(--aurora-cream)]">
         {finding.description}
       </p>
 
@@ -69,14 +69,14 @@ export function FindingCard({
           <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
             Cómo corregir
           </p>
-          <p className="mt-1 text-sm text-zinc-700 dark:text-zinc-300">
+          <p className="mt-1 text-sm text-zinc-700 dark:text-[color:var(--aurora-cream-dim)]">
             {finding.instruction}
           </p>
         </div>
       ) : null}
 
       {finding.example ? (
-        <div className="mt-3 rounded-md bg-zinc-50 p-3 text-sm italic text-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-300">
+        <div className="mt-3 rounded-md bg-zinc-50 p-3 text-sm italic text-zinc-700 dark:bg-[rgba(20,22,62,0.55)]/60 dark:text-[color:var(--aurora-cream-dim)]">
           <span className="not-italic text-xs font-semibold uppercase tracking-wide text-zinc-500">
             Ejemplo
           </span>
@@ -85,18 +85,18 @@ export function FindingCard({
       ) : null}
 
       {finding.recommendation ? (
-        <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="mt-3 text-sm text-zinc-600 dark:text-[color:var(--aurora-cream-dim)]">
           <span className="font-medium">Recomendación:</span>{" "}
           {finding.recommendation}
         </p>
       ) : null}
 
       {finding.human_comment ? (
-        <div className="mt-3 rounded-md border-l-4 border-zinc-300 bg-zinc-50 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900/60">
+        <div className="mt-3 rounded-md border-l-4 border-zinc-300 bg-zinc-50 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-[rgba(20,22,62,0.55)]/60">
           <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
             Nota del asesor
           </p>
-          <p className="mt-1 text-zinc-700 dark:text-zinc-300">
+          <p className="mt-1 text-zinc-700 dark:text-[color:var(--aurora-cream-dim)]">
             {finding.human_comment}
           </p>
         </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 
@@ -24,7 +24,7 @@ const STATUS_VALUES: SubmissionStatus[] = [
 ];
 
 const SELECT_CLASS =
-  "flex h-9 rounded-md border border-zinc-200 bg-white px-2 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 dark:border-zinc-800 dark:bg-zinc-950 dark:focus-visible:ring-zinc-300";
+  "flex h-9 rounded-md border border-zinc-200 bg-white px-2 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 dark:border-[color:rgba(196,181,253,0.12)] dark:bg-[rgba(11,14,42,0.55)] dark:focus-visible:ring-violet-500/40";
 
 export function BulkToolbar({
   selectedIds,
@@ -95,7 +95,7 @@ export function BulkToolbar({
   if (selectedIds.length === 0) return null;
 
   return (
-    <div className="sticky top-2 z-10 rounded-lg border border-zinc-200 bg-zinc-50 p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="sticky top-2 z-10 rounded-lg border border-zinc-200 bg-zinc-50 p-4 shadow-sm dark:border-[color:rgba(196,181,253,0.12)] dark:bg-[rgba(20,22,62,0.55)]">
       <div className="flex flex-wrap items-center gap-3">
         <Badge>{selectedIds.length} seleccionado{selectedIds.length === 1 ? "" : "s"}</Badge>
 
@@ -154,7 +154,7 @@ export function BulkToolbar({
             href={csvHref}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm font-medium text-zinc-900 underline-offset-4 hover:underline dark:text-zinc-100"
+            className="text-sm font-medium text-zinc-900 underline-offset-4 hover:underline dark:text-[color:var(--aurora-cream)]"
           >
             Descargar reporte CSV →
           </a>
@@ -167,13 +167,13 @@ export function BulkToolbar({
 
       {progress ? (
         <div className="mt-3 space-y-1">
-          <div className="flex justify-between text-xs text-zinc-600 dark:text-zinc-400">
+          <div className="flex justify-between text-xs text-zinc-600 dark:text-[color:var(--aurora-cream-dim)]">
             <span>Procesando IA…</span>
             <span>
               {progress.done} / {progress.total} listos
             </span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded bg-zinc-200 dark:bg-zinc-800">
+          <div className="h-2 w-full overflow-hidden rounded bg-zinc-200 dark:bg-[rgba(124,58,237,0.18)]">
             <div
               className="h-full bg-zinc-900 transition-all dark:bg-zinc-50"
               style={{

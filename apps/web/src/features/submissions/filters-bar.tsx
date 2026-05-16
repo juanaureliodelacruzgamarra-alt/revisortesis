@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
@@ -19,7 +19,7 @@ const STATUS_VALUES: SubmissionStatus[] = [
 ];
 
 const SELECT_CLASS =
-  "flex h-9 rounded-md border border-zinc-200 bg-white px-2 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 dark:border-zinc-800 dark:bg-zinc-950 dark:focus-visible:ring-zinc-300";
+  "flex h-9 rounded-md border border-zinc-200 bg-white px-2 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 dark:border-[color:rgba(196,181,253,0.12)] dark:bg-[rgba(11,14,42,0.55)] dark:focus-visible:ring-violet-500/40";
 
 export function FiltersBar({ programs }: { programs: Program[] }) {
   const router = useRouter();
@@ -63,7 +63,7 @@ export function FiltersBar({ programs }: { programs: Program[] }) {
         ))}
       </select>
 
-      <label className="inline-flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400">
+      <label className="inline-flex items-center gap-2 text-xs text-zinc-600 dark:text-[color:var(--aurora-cream-dim)]">
         <input
           type="checkbox"
           checked={params.get("fit_alert") === "true"}
@@ -78,7 +78,7 @@ export function FiltersBar({ programs }: { programs: Program[] }) {
           type="button"
           onClick={() => start(() => router.replace("?"))}
           disabled={pending}
-          className="rounded-md border border-zinc-200 px-2 py-1 text-xs text-zinc-600 hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          className="rounded-md border border-zinc-200 px-2 py-1 text-xs text-zinc-600 hover:bg-zinc-100 dark:border-[color:rgba(196,181,253,0.12)] dark:text-[color:var(--aurora-cream-dim)] dark:hover:bg-[rgba(124,58,237,0.12)]"
         >
           Limpiar
         </button>

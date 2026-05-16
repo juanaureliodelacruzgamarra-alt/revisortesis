@@ -25,7 +25,7 @@ import { fetchPlagiarismMatches } from "@/lib/api/plagiarism";
 import { fetchSubmission } from "@/lib/api/submissions";
 import { getCurrentUser } from "@/lib/auth/session";
 
-export const metadata = { title: "Revisar avance · KIMY" };
+export const metadata = { title: "Revisar avance · Aurelio" };
 
 function formatSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -77,7 +77,7 @@ export default async function AdvisorReviewDetail({
       <div>
         <Link
           href="/advisor/reviews"
-          className="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
+          className="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-[color:var(--aurora-cream)]"
         >
           ← Volver a mis revisiones
         </Link>
@@ -100,7 +100,7 @@ export default async function AdvisorReviewDetail({
               {submission.title}
             </h1>
             {submission.chapter ? (
-              <p className="text-zinc-600 dark:text-zinc-400">
+              <p className="text-zinc-600 dark:text-[color:var(--aurora-cream-dim)]">
                 {submission.chapter}
               </p>
             ) : null}
@@ -140,11 +140,11 @@ export default async function AdvisorReviewDetail({
                   {isPdf && downloadHref ? (
                     <iframe
                       src={downloadHref}
-                      className="h-[600px] w-full rounded-md border border-zinc-200 dark:border-zinc-800"
+                      className="h-[600px] w-full rounded-md border border-zinc-200 dark:border-[color:rgba(196,181,253,0.12)]"
                       title={latestVersion.original_filename}
                     />
                   ) : (
-                    <p className="rounded-md border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-300">
+                    <p className="rounded-md border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-700 dark:border-[color:rgba(196,181,253,0.12)] dark:bg-[rgba(20,22,62,0.55)]/60 dark:text-[color:var(--aurora-cream-dim)]">
                       Vista previa no disponible para documentos Word. Descarga
                       el archivo para revisarlo.
                     </p>

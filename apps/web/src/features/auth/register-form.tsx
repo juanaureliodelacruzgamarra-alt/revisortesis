@@ -4,12 +4,17 @@ import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import { registerAction, type AuthActionResult } from "@/lib/auth/actions";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ROLE_LABELS, type UserRole } from "@/lib/auth/types";
 
 const ROLE_OPTIONS: UserRole[] = ["student", "advisor", "coordinator"];
+
+function fieldLabel(text: string) {
+  return (
+    <span className="text-xs font-medium uppercase tracking-[0.18em] text-[color:var(--aurora-cream-dim)]">
+      {text}
+    </span>
+  );
+}
 
 export function RegisterForm() {
   const router = useRouter();
@@ -26,51 +31,63 @@ export function RegisterForm() {
   }, [state, router]);
 
   return (
-    <form action={formAction} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="full_name">Nombre completo</Label>
-        <Input
+    <form action={formAction} className="space-y-5">
+      <div className="space-y-1.5">
+        <label htmlFor="full_name">{fieldLabel("Nombre completo")}</label>
+        <input
           id="full_name"
           name="full_name"
           type="text"
           autoComplete="name"
           minLength={2}
           required
+          className="aurora-input flex h-11 w-full rounded-md px-3.5 text-sm"
         />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="email">Correo</Label>
-        <Input
+
+      <div className="space-y-1.5">
+        <label htmlFor="email">{fieldLabel("Correo institucional")}</label>
+        <input
           id="email"
           name="email"
           type="email"
           placeholder="usuario@unt.edu.pe"
           autoComplete="email"
           required
+          className="aurora-input flex h-11 w-full rounded-md px-3.5 text-sm"
         />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="password">Contraseña</Label>
-        <Input
+
+      <div className="space-y-1.5">
+        <label htmlFor="password">{fieldLabel("Contraseña")}</label>
+        <input
           id="password"
           name="password"
           type="password"
           autoComplete="new-password"
           minLength={8}
           required
+          className="aurora-input flex h-11 w-full rounded-md px-3.5 text-sm"
         />
-        <p className="text-xs text-zinc-500">Mínimo 8 caracteres.</p>
+        <p className="text-xs text-[color:var(--aurora-cream-dim)]">
+          Mínimo 8 caracteres.
+        </p>
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="role">Rol</Label>
+
+      <div className="space-y-1.5">
+        <label htmlFor="role">{fieldLabel("Rol")}</label>
         <select
           id="role"
           name="role"
           defaultValue="student"
-          className="flex h-10 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 dark:border-zinc-800 dark:bg-zinc-950 dark:focus-visible:ring-zinc-300"
+          className="aurora-input flex h-11 w-full rounded-md px-3.5 text-sm"
         >
           {ROLE_OPTIONS.map((role) => (
-            <option key={role} value={role}>
+            <option
+              key={role}
+              value={role}
+              className="bg-[color:var(--aurora-base-2)] text-[color:var(--aurora-cream)]"
+            >
               {ROLE_LABELS[role]}
             </option>
           ))}
@@ -78,14 +95,25 @@ export function RegisterForm() {
       </div>
 
       {state && !state.ok ? (
-        <p className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-300">
+        <p className="rounded-md border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-300">
           {state.error}
         </p>
       ) : null}
 
-      <Button type="submit" disabled={pending} className="w-full">
-        {pending ? "Creando cuenta…" : "Crear cuenta"}
-      </Button>
+      <button
+        type="submit"
+        disabled={pending}
+        className="aurora-btn-primary flex h-11 w-full items-center justify-center gap-2 rounded-md text-sm font-semibold tracking-wide disabled:cursor-not-allowed"
+      >
+        {pending ? (
+          "Creando cuenta…"
+        ) : (
+          <>
+            Crear cuenta
+            <span aria-hidden>→</span>
+          </>
+        )}
+      </button>
     </form>
   );
 }

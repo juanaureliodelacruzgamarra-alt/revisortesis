@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 
 import {
   Card,
@@ -32,14 +32,14 @@ export async function RoleHome({ expectedRole, description, upcoming }: Props) {
         <h1 className="text-3xl font-semibold tracking-tight">
           Hola, {user.full_name.split(" ")[0]}
         </h1>
-        <p className="text-zinc-600 dark:text-zinc-400">{description}</p>
+        <p className="text-zinc-600 dark:text-[color:var(--aurora-cream-dim)]">{description}</p>
       </header>
 
       <Card>
         <CardHeader>
           <CardTitle>Tu sesión</CardTitle>
           <CardDescription>
-            Información obtenida desde el backend KIMY.
+            Información obtenida desde el backend Aurelio.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -64,7 +64,7 @@ export async function RoleHome({ expectedRole, description, upcoming }: Props) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ul className="space-y-2 text-sm text-zinc-700 dark:text-zinc-300">
+          <ul className="space-y-2 text-sm text-zinc-700 dark:text-[color:var(--aurora-cream-dim)]">
             {upcoming.map((item) => (
               <li key={item}>• {item}</li>
             ))}

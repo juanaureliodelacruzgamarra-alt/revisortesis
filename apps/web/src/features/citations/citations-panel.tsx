@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge";
+﻿import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -91,7 +91,7 @@ export function CitationsPanel({
           {sorted.map((c) => (
             <li
               key={c.id}
-              className="rounded-md border border-zinc-200 p-3 text-sm dark:border-zinc-800"
+              className="rounded-md border border-zinc-200 p-3 text-sm dark:border-[color:rgba(196,181,253,0.12)]"
             >
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant={statusVariant(c.crossref_status)}>
@@ -113,7 +113,7 @@ export function CitationsPanel({
               </div>
 
               {c.title ? (
-                <p className="mt-2 font-medium text-zinc-900 dark:text-zinc-100">
+                <p className="mt-2 font-medium text-zinc-900 dark:text-[color:var(--aurora-cream)]">
                   {c.title}
                 </p>
               ) : null}
@@ -127,16 +127,16 @@ export function CitationsPanel({
               ) : null}
 
               {c.crossref_message ? (
-                <p className="mt-2 rounded bg-zinc-50 px-2 py-1.5 text-xs text-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-300">
+                <p className="mt-2 rounded bg-zinc-50 px-2 py-1.5 text-xs text-zinc-700 dark:bg-[rgba(20,22,62,0.55)]/60 dark:text-[color:var(--aurora-cream-dim)]">
                   {c.crossref_message}
                 </p>
               ) : null}
 
               <details className="mt-2">
-                <summary className="cursor-pointer text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">
+                <summary className="cursor-pointer text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-[color:var(--aurora-cream)]">
                   Ver texto original
                 </summary>
-                <p className="mt-1 whitespace-pre-wrap text-xs text-zinc-600 dark:text-zinc-400">
+                <p className="mt-1 whitespace-pre-wrap text-xs text-zinc-600 dark:text-[color:var(--aurora-cream-dim)]">
                   {c.raw_text}
                 </p>
               </details>
@@ -146,7 +146,7 @@ export function CitationsPanel({
                   href={searchHref(c)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-2 inline-block text-xs font-medium text-zinc-900 underline-offset-4 hover:underline dark:text-zinc-100"
+                  className="mt-2 inline-block text-xs font-medium text-zinc-900 underline-offset-4 hover:underline dark:text-[color:var(--aurora-cream)]"
                 >
                   Buscar en Google Scholar →
                 </a>

@@ -5,18 +5,31 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/cn";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:focus-visible:ring-zinc-300",
+  // `whitespace-nowrap` keeps labels on a single line so two-word CTAs like
+  // "Reporte ejecutivo (PDF)" don't wrap inside a fixed-height button.
+  // `shrink-0` prevents flex parents from squashing the button when the sibling
+  // text takes most of the row width.
+  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium leading-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:focus-visible:ring-violet-400 dark:focus-visible:ring-offset-[#0b0e2a]",
   {
     variants: {
       variant: {
-        default:
-          "bg-zinc-900 text-zinc-50 hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90",
-        outline:
-          "border border-zinc-200 bg-white hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
-        ghost:
-          "hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
-        destructive:
-          "bg-rose-600 text-white hover:bg-rose-700 dark:bg-rose-600 dark:text-white dark:hover:bg-rose-700",
+        default: cn(
+          "bg-zinc-900 text-zinc-50 hover:bg-zinc-900/90",
+          // Aurora: violet gradient with subtle glow
+          "dark:bg-gradient-to-br dark:from-violet-600 dark:to-violet-400 dark:text-white dark:shadow-[0_8px_24px_-10px_rgba(124,58,237,0.6)] dark:hover:from-violet-500 dark:hover:to-violet-300",
+        ),
+        outline: cn(
+          "border border-zinc-200 bg-white hover:bg-zinc-100 hover:text-zinc-900",
+          "dark:border-[color:rgba(196,181,253,0.3)] dark:bg-transparent dark:text-[color:var(--aurora-cream)] dark:hover:border-[color:rgba(196,181,253,0.55)] dark:hover:bg-[rgba(124,58,237,0.12)]",
+        ),
+        ghost: cn(
+          "hover:bg-zinc-100 hover:text-zinc-900",
+          "dark:text-[color:var(--aurora-cream)] dark:hover:bg-[rgba(124,58,237,0.12)]",
+        ),
+        destructive: cn(
+          "bg-rose-600 text-white hover:bg-rose-700",
+          "dark:bg-rose-500/90 dark:hover:bg-rose-500",
+        ),
       },
       size: {
         default: "h-10 px-4 py-2",

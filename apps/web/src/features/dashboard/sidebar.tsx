@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
 import { logoutAction } from "@/lib/auth/actions";
 import { ROLE_LABELS, type CurrentUser } from "@/lib/auth/types";
 import { cn } from "@/lib/cn";
@@ -14,12 +13,19 @@ export function Sidebar({ user }: { user: CurrentUser }) {
   const items = NAV_BY_ROLE[user.role];
 
   return (
-    <aside className="flex h-screen w-64 flex-col border-r border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
-      <div className="border-b border-zinc-200 px-6 py-5 dark:border-zinc-800">
-        <p className="text-xs font-medium uppercase tracking-widest text-zinc-500">
-          Sistema
+    <aside className="relative z-10 flex h-screen w-64 flex-col border-r border-[color:rgba(196,181,253,0.12)] bg-[rgba(7,9,29,0.7)] backdrop-blur-xl">
+      <div className="border-b border-[color:rgba(196,181,253,0.1)] px-6 py-5">
+        <div className="flex items-center gap-2">
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-violet-500 to-violet-300 text-xs font-bold text-zinc-950 shadow-[0_0_18px_-4px_rgba(124,58,237,0.6)]">
+            A
+          </span>
+          <p className="aurora-display text-xl font-semibold tracking-tight text-[color:var(--aurora-cream)]">
+            Aurelio
+          </p>
+        </div>
+        <p className="mt-1 text-[10px] font-medium uppercase tracking-[0.22em] text-[color:var(--aurora-cream-dim)]">
+          Revisión académica con IA
         </p>
-        <p className="text-xl font-semibold tracking-tight">KIMY</p>
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
@@ -31,32 +37,47 @@ export function Sidebar({ user }: { user: CurrentUser }) {
               key={item.href}
               href={item.href}
               className={cn(
-                "block rounded-md px-3 py-2 text-sm transition-colors",
+                "group relative block rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 active
-                  ? "bg-zinc-900 text-zinc-50 dark:bg-zinc-50 dark:text-zinc-900"
-                  : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800",
+                  ? "bg-gradient-to-r from-violet-600/40 to-violet-400/10 text-[color:var(--aurora-cream)] shadow-[0_0_0_1px_rgba(196,181,253,0.25)_inset]"
+                  : "text-[color:var(--aurora-cream-dim)] hover:bg-[rgba(124,58,237,0.12)] hover:text-[color:var(--aurora-cream)]",
               )}
             >
+              {active ? (
+                <span
+                  aria-hidden
+                  className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r bg-gradient-to-b from-violet-300 to-violet-500"
+                />
+              ) : null}
               {item.label}
             </Link>
           );
         })}
       </nav>
 
-      <div className="border-t border-zinc-200 p-4 dark:border-zinc-800">
-        <p className="truncate text-sm font-medium" title={user.full_name}>
+      <div className="border-t border-[color:rgba(196,181,253,0.1)] p-4">
+        <p
+          className="truncate text-sm font-medium text-[color:var(--aurora-cream)]"
+          title={user.full_name}
+        >
           {user.full_name}
         </p>
-        <p className="truncate text-xs text-zinc-500" title={user.email}>
+        <p
+          className="truncate text-xs text-[color:var(--aurora-cream-dim)]"
+          title={user.email}
+        >
           {user.email}
         </p>
-        <p className="mt-1 inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+        <p className="mt-2 inline-flex items-center rounded-full border border-[color:rgba(196,181,253,0.25)] bg-[rgba(124,58,237,0.12)] px-2 py-0.5 text-[10px] font-medium uppercase tracking-widest text-[color:var(--aurora-primary-soft)]">
           {ROLE_LABELS[user.role]}
         </p>
         <form action={logoutAction} className="mt-3">
-          <Button type="submit" variant="outline" size="sm" className="w-full">
+          <button
+            type="submit"
+            className="aurora-btn-ghost flex h-9 w-full items-center justify-center rounded-md text-xs font-medium uppercase tracking-widest"
+          >
             Cerrar sesión
-          </Button>
+          </button>
         </form>
       </div>
     </aside>

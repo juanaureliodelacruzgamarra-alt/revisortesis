@@ -17,7 +17,7 @@ app = FastAPI(
     title=settings.app_name,
     version=__version__,
     description=(
-        "KIMY — Backend API for academic thesis review with AI evaluation, "
+        "Aurelio — Backend API for academic thesis review with AI evaluation, "
         "plagiarism detection (pgvector), citation validation (CrossRef), "
         "and ORCID-based advisor identity."
     ),

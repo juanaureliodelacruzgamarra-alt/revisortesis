@@ -19,7 +19,7 @@ import { fetchEvaluation } from "@/lib/api/evaluations";
 import { fetchSubmission } from "@/lib/api/submissions";
 import { getCurrentUser } from "@/lib/auth/session";
 
-export const metadata = { title: "Avance · KIMY" };
+export const metadata = { title: "Avance · Aurelio" };
 
 export default async function StudentSubmissionDetail({
   params,
@@ -60,7 +60,7 @@ export default async function StudentSubmissionDetail({
       <div>
         <Link
           href="/student/submissions"
-          className="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
+          className="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-[color:var(--aurora-cream)]"
         >
           ← Volver a mis avances
         </Link>
@@ -77,7 +77,7 @@ export default async function StudentSubmissionDetail({
           {submission.title}
         </h1>
         {submission.chapter ? (
-          <p className="text-zinc-600 dark:text-zinc-400">
+          <p className="text-zinc-600 dark:text-[color:var(--aurora-cream-dim)]">
             {submission.chapter}
           </p>
         ) : null}

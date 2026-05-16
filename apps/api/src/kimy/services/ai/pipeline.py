@@ -86,17 +86,17 @@ async def _run_inner(session: AsyncSession, version_id: UUID) -> None:
         except Exception as exc:  # noqa: BLE001
             logger.warning("re-extract failed for %s: %s", version_id, exc)
 
-    # Resolve which OpenAI model to use (base or fine-tuned) from system_settings.
-    openai_model_override: str | None = None
+    # Resolve which model to use (base or fine-tuned) from system_settings.
+    model_override: str | None = None
     try:
         from kimy.models.system_setting import KEY_AI_MODEL_PREFERENCE
         from kimy.services import settings as settings_service
 
         pref = await settings_service.get(session, KEY_AI_MODEL_PREFERENCE)
         if pref.get("use_fine_tuned") and pref.get("fine_tuned_model"):
-            openai_model_override = pref["fine_tuned_model"]
-        elif pref.get("openai_model"):
-            openai_model_override = pref["openai_model"]
+            model_override = pref["fine_tuned_model"]
+        elif pref.get("model"):
+            model_override = pref["model"]
     except Exception:  # noqa: BLE001
         logger.exception("could not read AI model preference; falling back to defaults")
 
@@ -106,7 +106,7 @@ async def _run_inner(session: AsyncSession, version_id: UUID) -> None:
         submission=submission,
         version=version,
         submission_text=raw_text,
-        openai_model_override=openai_model_override,
+        model_override=model_override,
     )
     duration_ms = int((time.perf_counter() - started) * 1000)
 
@@ -233,7 +233,7 @@ def _evaluate(
     submission: Submission | None,
     version: SubmissionVersion,
     submission_text: str,
-    openai_model_override: str | None = None,
+    model_override: str | None = None,
 ) -> tuple[AIEvaluationDraft, str, str]:
     template_title = template.title if template else "(sin patrón asignado)"
     template_structure = template.structure_json if template else None
@@ -249,7 +249,7 @@ def _evaluate(
             submission_chapter=submission_chapter,
             submission_structure=submission_structure,
             submission_text=submission_text,
-            openai_model_override=openai_model_override,
+            model_override=model_override,
         )
     except llm_evaluator.LLMUnavailableError:
         logger.info("no LLM available — using stub evaluator")

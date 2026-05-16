@@ -2,7 +2,7 @@
 
 Generated on-demand via reportlab so we don't need a system-level PDF engine
 (weasyprint/wkhtmltopdf) on Windows. The output includes:
-- Header with KIMY branding + submission metadata + student/advisor
+- Header with Aurelio branding + submission metadata + student/advisor
 - AI evaluation summary (executive + scores per dimension)
 - Findings grouped by severity, with the advisor's human action when present
 - Plagiarism matches summary
@@ -11,7 +11,6 @@ Generated on-demand via reportlab so we don't need a system-level PDF engine
 """
 from __future__ import annotations
 
-from datetime import UTC, datetime
 from io import BytesIO
 from typing import Any
 
@@ -33,6 +32,11 @@ from kimy.models.ai_evaluation import AIEvaluation
 from kimy.models.ai_finding import FindingSeverity
 from kimy.models.citation import CitationStatus
 from kimy.models.submission import Submission, SubmissionStatus
+from kimy.services.reports.pdf_letterhead import (
+    LETTERHEAD_BOTTOM_MARGIN,
+    LETTERHEAD_TOP_MARGIN,
+    make_letterhead,
+)
 
 _SEVERITY_LABELS = {
     FindingSeverity.critical: ("Crítico", colors.HexColor("#b91c1c")),
@@ -155,22 +159,16 @@ def render_acta(
         pagesize=A4,
         leftMargin=2.0 * cm,
         rightMargin=2.0 * cm,
-        topMargin=1.6 * cm,
-        bottomMargin=1.6 * cm,
-        title=f"Acta KIMY - {submission.title}",
-        author="KIMY",
+        topMargin=LETTERHEAD_TOP_MARGIN,
+        bottomMargin=LETTERHEAD_BOTTOM_MARGIN,
+        title=f"Acta Aurelio - {submission.title}",
+        author="Aurelio",
     )
     styles = _styles()
     story: list[Any] = []
 
-    # Header
-    story.append(Paragraph("KIMY · Acta de revisión", styles["h1"]))
-    story.append(
-        Paragraph(
-            f"Generada el {datetime.now(UTC).strftime('%d/%m/%Y %H:%M UTC')}",
-            styles["muted"],
-        )
-    )
+    # Header (membrete dibujado por make_letterhead — aquí solo el título lógico).
+    story.append(Paragraph("Acta de revisión", styles["h1"]))
     story.append(Spacer(1, 0.4 * cm))
 
     # Metadata
@@ -322,16 +320,17 @@ def render_acta(
         story.append(_table_with_header(rows, col_widths=[10.5 * cm, 5.0 * cm]))
         story.append(Paragraph(f"Total de citas: {total_cits}", styles["muted"]))
 
-    # Footer
+    # Disclaimer
     story.append(Spacer(1, 0.6 * cm))
     story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor("#d4d4d8")))
     story.append(
         Paragraph(
-            "Este documento fue generado automáticamente por la plataforma KIMY. "
+            "Este documento fue generado automáticamente por la plataforma Aurelio. "
             "Las decisiones académicas finales son responsabilidad del asesor y del coordinador del programa.",
             styles["muted"],
         )
     )
 
-    doc.build(story)
+    letterhead = make_letterhead("Acta de revisión")
+    doc.build(story, onFirstPage=letterhead, onLaterPages=letterhead)
     return buf.getvalue()

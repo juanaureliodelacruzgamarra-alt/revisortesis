@@ -1,12 +1,20 @@
-"""OpenAI fine-tuning submission helper.
+"""Fine-tuning submission helper.
 
-Only used when ``OPENAI_API_KEY`` is configured. The flow:
-1. Upload the JSONL to OpenAI Files API (purpose=fine-tune).
-2. Create a fine-tuning job referencing the file ID + base model.
-3. Return (file_id, job_id) so the caller can persist them on FineTuningJob.
+After the migration to Gemini, programmatic fine-tuning via the chat-JSONL
+format that OpenAI exposed is no longer wired up. Gemini's tuning lives in a
+different API surface (Vertex AI / Gemini Tuning API with input/output pairs
+and parameter-efficient adapters), so this module returns a clear "not
+supported" error.
 
-Status polling is *intentionally* left out of the request path — callers can
-hit ``/api/v1/admin/fine-tuning/jobs/{id}/refresh`` to update on demand.
+The dataset export pipeline (``services.fine_tuning.exporter``) still produces
+a JSONL snapshot of human-validated feedback, which remains useful for:
+- Auditing the human-in-the-loop feedback quality.
+- Manual import into a future tuning provider.
+- Statistical analysis of severity/action distributions.
+
+If you want to re-enable submission for a different provider, replace
+``submit_jsonl`` and ``refresh_status`` with the corresponding SDK calls and
+keep the dataclass shape so the admin UI keeps working unchanged.
 """
 from __future__ import annotations
 
@@ -19,12 +27,13 @@ from kimy.core.config import get_settings
 logger = logging.getLogger(__name__)
 
 
-class OpenAINotConfiguredError(Exception):
-    pass
+class FineTuningNotSupportedError(Exception):
+    """Raised when the active provider does not expose chat-format fine-tuning."""
 
 
-class OpenAISubmitError(Exception):
-    pass
+# Legacy aliases — kept so existing imports in api/v1/fine_tuning.py still work.
+OpenAINotConfiguredError = FineTuningNotSupportedError
+OpenAISubmitError = FineTuningNotSupportedError
 
 
 @dataclass(slots=True)
@@ -36,55 +45,24 @@ class SubmitResult:
 
 
 def is_available() -> bool:
-    return bool(get_settings().openai_api_key)
+    """Return whether the active provider supports programmatic fine-tuning.
+
+    Gemini does not (in this codebase), so this always returns False. The UI
+    uses this to disable the "submit" button and surface an explanation.
+    """
+    return False
 
 
-def submit_jsonl(absolute_path: Path, *, base_model: str = "gpt-4o-mini") -> SubmitResult:
+def submit_jsonl(absolute_path: Path, *, base_model: str = "gemini-2.0-flash") -> SubmitResult:
     settings = get_settings()
-    if not settings.openai_api_key:
-        raise OpenAINotConfiguredError("OPENAI_API_KEY is not set")
-
-    try:
-        from openai import OpenAI
-    except ImportError as exc:
-        raise OpenAISubmitError(f"openai package missing: {exc}") from exc
-
-    client = OpenAI(api_key=settings.openai_api_key)
-
-    try:
-        with absolute_path.open("rb") as fp:
-            file_obj = client.files.create(file=fp, purpose="fine-tune")
-    except Exception as exc:  # noqa: BLE001
-        raise OpenAISubmitError(f"file upload failed: {exc}") from exc
-
-    try:
-        job = client.fine_tuning.jobs.create(
-            training_file=file_obj.id,
-            model=base_model,
-        )
-    except Exception as exc:  # noqa: BLE001
-        raise OpenAISubmitError(f"job creation failed: {exc}") from exc
-
-    return SubmitResult(
-        file_id=file_obj.id,
-        job_id=job.id,
-        base_model=base_model,
-        status=getattr(job, "status", "queued"),
+    _ = settings  # kept for future provider routing
+    raise FineTuningNotSupportedError(
+        "Fine-tuning programático no está disponible con Gemini en esta fase. "
+        "Descarga el dataset JSONL y entrena offline en Vertex AI / Gemini Tuning."
     )
 
 
 def refresh_status(job_id: str) -> dict[str, str | None]:
-    """Re-query OpenAI for a single job's status."""
-    settings = get_settings()
-    if not settings.openai_api_key:
-        raise OpenAINotConfiguredError("OPENAI_API_KEY is not set")
-
-    from openai import OpenAI
-
-    client = OpenAI(api_key=settings.openai_api_key)
-    job = client.fine_tuning.jobs.retrieve(job_id)
-    return {
-        "status": getattr(job, "status", None),
-        "fine_tuned_model": getattr(job, "fine_tuned_model", None),
-        "error": getattr(getattr(job, "error", None), "message", None) if getattr(job, "error", None) else None,
-    }
+    raise FineTuningNotSupportedError(
+        "Refresh no disponible: el job nunca se envió a un proveedor remoto."
+    )

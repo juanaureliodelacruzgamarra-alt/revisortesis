@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import {
@@ -12,7 +12,7 @@ import { SubmissionForm } from "@/features/submissions/submission-form";
 import { fetchPrograms } from "@/lib/api/programs";
 import { getCurrentUser } from "@/lib/auth/session";
 
-export const metadata = { title: "Nuevo avance · KIMY" };
+export const metadata = { title: "Nuevo avance · Aurelio" };
 
 export default async function NewSubmissionPage() {
   const user = await getCurrentUser();
@@ -26,7 +26,7 @@ export default async function NewSubmissionPage() {
       <div>
         <Link
           href="/student/submissions"
-          className="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
+          className="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-[color:var(--aurora-cream)]"
         >
           ← Volver a mis avances
         </Link>
@@ -34,7 +34,7 @@ export default async function NewSubmissionPage() {
 
       <header className="space-y-1">
         <h1 className="text-3xl font-semibold tracking-tight">Nuevo avance</h1>
-        <p className="text-zinc-600 dark:text-zinc-400">
+        <p className="text-zinc-600 dark:text-[color:var(--aurora-cream-dim)]">
           Primero crea la entrada del avance. En el detalle podrás subir las
           versiones (.docx o .pdf).
         </p>

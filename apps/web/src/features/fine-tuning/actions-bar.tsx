@@ -94,7 +94,7 @@ export function JobActionButtons({
           disabled={pending}
           variant="outline"
         >
-          {pending ? "Enviando…" : "Enviar a OpenAI"}
+          {pending ? "Enviando…" : "Enviar a proveedor"}
         </Button>
       ) : null}
       {canRefresh ? (

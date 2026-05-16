@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useTransition } from "react";
 
@@ -49,7 +49,7 @@ export function FindingActions({
   }
 
   return (
-    <div className="mt-4 space-y-3 border-t border-zinc-200 pt-4 dark:border-zinc-800">
+    <div className="mt-4 space-y-3 border-t border-zinc-200 pt-4 dark:border-[color:rgba(196,181,253,0.12)]">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="space-y-1">
           <Label
@@ -62,7 +62,7 @@ export function FindingActions({
             id={`severity-${finding.id}`}
             value={severity}
             onChange={(e) => setSeverity(e.target.value as FindingSeverity)}
-            className="flex h-9 w-full rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 dark:border-zinc-800 dark:bg-zinc-950 dark:focus-visible:ring-zinc-300"
+            className="flex h-9 w-full rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 dark:border-[color:rgba(196,181,253,0.12)] dark:bg-[rgba(11,14,42,0.55)] dark:focus-visible:ring-violet-500/40"
           >
             {SEVERITY_OPTIONS.map((s) => (
               <option key={s} value={s}>

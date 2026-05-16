@@ -1,4 +1,4 @@
-"""KIMY v1 evaluation prompts.
+"""Aurelio v1 evaluation prompts.
 
 Single-shot prompt: given the institutional template structure + the student
 submission text and structure, the model produces a structured JSON evaluation
@@ -14,7 +14,7 @@ PROMPT_VERSION = "v1"
 # Hard cap on text we send to the model to control cost / context size.
 MAX_SUBMISSION_CHARS = 30_000
 
-SYSTEM_PROMPT = """Eres KIMY, un evaluador académico experto en tesis de maestría y doctorado en universidades latinoamericanas.
+SYSTEM_PROMPT = """Eres Aurelio, un evaluador académico experto en tesis de maestría y doctorado en universidades latinoamericanas.
 
 Tu trabajo es revisar AVANCES DE TESIS contra un DOCUMENTO PATRÓN institucional y producir retroalimentación accionable, justa y específica para el estudiante.
 

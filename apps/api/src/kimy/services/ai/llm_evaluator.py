@@ -1,7 +1,7 @@
-"""LLM-backed evaluator. Calls OpenAI (preferred) or Anthropic with JSON output.
+"""LLM-backed evaluator — Google Gemini (primary) with Anthropic legacy fallback.
 
-Falls back to raising LLMUnavailableError if no API key is configured or the
-client/library is missing; the pipeline will then use the stub evaluator.
+Falls back to raising LLMUnavailableError if no provider is usable; the pipeline
+will then use the stub evaluator.
 """
 from __future__ import annotations
 
@@ -26,8 +26,8 @@ class LLMResponseError(Exception):
     """Raised when the model replied with output we can't parse into a draft."""
 
 
-# Models we default to; both support JSON / structured output.
-_OPENAI_MODEL = "gpt-4o-mini"
+# Defaults; both support JSON / structured output.
+_GEMINI_MODEL = "gemini-2.0-flash"
 _ANTHROPIC_MODEL = "claude-3-5-sonnet-latest"
 
 
@@ -39,13 +39,12 @@ def evaluate(
     submission_chapter: str | None,
     submission_structure: dict[str, Any] | None,
     submission_text: str,
-    openai_model_override: str | None = None,
+    model_override: str | None = None,
 ) -> tuple[AIEvaluationDraft, str, str]:
     """Return (draft, backend_name, model_name) using the first LLM that works.
 
-    ``openai_model_override`` lets the caller swap the OpenAI model at request
-    time — used by the pipeline to honour the admin's ``ai.model_preference``
-    setting (e.g., a fine-tuned ``ft:gpt-4o-mini-2024-…`` id).
+    ``model_override`` lets the caller swap the active model at request time —
+    used by the pipeline to honour the admin's ``ai.model_preference`` setting.
     """
     settings = get_settings()
     user_prompt = prompts.build_user_prompt(
@@ -57,21 +56,22 @@ def evaluate(
         submission_text=submission_text,
     )
 
-    openai_model = openai_model_override or _OPENAI_MODEL
-    if settings.openai_api_key:
+    gemini_model = model_override or _GEMINI_MODEL
+    if settings.gemini_api_key:
         try:
-            raw = _call_openai(
+            raw = _call_gemini(
                 prompts.system_prompt(),
                 user_prompt,
-                settings.openai_api_key,
-                model=openai_model,
+                settings.gemini_api_key,
+                model=gemini_model,
             )
-            return _parse(raw), "openai", openai_model
+            return _parse(raw), "gemini", gemini_model
         except (LLMResponseError, ValidationError) as exc:
-            logger.warning("openai response unusable, falling through: %s", exc)
+            logger.warning("gemini response unusable, falling through: %s", exc)
         except Exception:
-            logger.exception("openai call failed, falling through")
+            logger.exception("gemini call failed, falling through")
 
+    # Legacy fallback — only triggers if Anthropic key is set AND Gemini failed.
     if settings.anthropic_api_key:
         try:
             raw = _call_anthropic(prompts.system_prompt(), user_prompt, settings.anthropic_api_key)
@@ -82,7 +82,7 @@ def evaluate(
             logger.exception("anthropic call failed, falling through")
 
     raise LLMUnavailableError(
-        "No usable LLM backend. Configure OPENAI_API_KEY or ANTHROPIC_API_KEY."
+        "No usable LLM backend. Configure GEMINI_API_KEY (or ANTHROPIC_API_KEY as fallback)."
     )
 
 
@@ -94,26 +94,27 @@ def _parse(raw_json: str) -> AIEvaluationDraft:
     return AIEvaluationDraft.model_validate(payload)
 
 
-def _call_openai(system: str, user: str, api_key: str, *, model: str = _OPENAI_MODEL) -> str:
+def _call_gemini(system: str, user: str, api_key: str, *, model: str = _GEMINI_MODEL) -> str:
     try:
-        from openai import OpenAI
+        from google import genai
+        from google.genai import types as genai_types
     except ImportError as exc:
-        raise LLMUnavailableError("openai package not installed") from exc
+        raise LLMUnavailableError("google-genai package not installed") from exc
 
-    client = OpenAI(api_key=api_key)
-    completion = client.chat.completions.create(
+    client = genai.Client(api_key=api_key)
+    response = client.models.generate_content(
         model=model,
-        response_format={"type": "json_object"},
-        temperature=0.2,
-        messages=[
-            {"role": "system", "content": system},
-            {"role": "user", "content": user},
-        ],
+        contents=user,
+        config=genai_types.GenerateContentConfig(
+            system_instruction=system,
+            response_mime_type="application/json",
+            temperature=0.2,
+        ),
     )
-    content = completion.choices[0].message.content
-    if not content:
-        raise LLMResponseError("openai returned empty content")
-    return content
+    text = getattr(response, "text", None)
+    if not text:
+        raise LLMResponseError("gemini returned empty content")
+    return text
 
 
 def _call_anthropic(system: str, user: str, api_key: str) -> str:
@@ -138,7 +139,6 @@ def _call_anthropic(system: str, user: str, api_key: str) -> str:
     )
     if not resp.content:
         raise LLMResponseError("anthropic returned empty content")
-    # The model may include leading whitespace or a single code fence.
     raw = "".join(
         getattr(block, "text", "") for block in resp.content if getattr(block, "type", "") == "text"
     ).strip()

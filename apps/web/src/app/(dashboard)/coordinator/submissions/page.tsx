@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 
 import {
   Card,
@@ -17,7 +17,7 @@ import {
 } from "@/lib/api/submissions";
 import { getCurrentUser } from "@/lib/auth/session";
 
-export const metadata = { title: "Avances del programa · KIMY" };
+export const metadata = { title: "Avances del programa · Aurelio" };
 
 export default async function CoordinatorSubmissionsPage({
   searchParams,
@@ -50,7 +50,7 @@ export default async function CoordinatorSubmissionsPage({
           Coordinador
         </p>
         <h1 className="text-3xl font-semibold tracking-tight">Avances</h1>
-        <p className="text-zinc-600 dark:text-zinc-400">
+        <p className="text-zinc-600 dark:text-[color:var(--aurora-cream-dim)]">
           Filtra por programa, estado y alerta ORCID. Asigna o cambia el asesor
           de cada avance — la afinidad temática se recalcula automáticamente.
         </p>

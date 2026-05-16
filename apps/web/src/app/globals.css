@@ -1,8 +1,23 @@
 @import "tailwindcss";
 
+/* Force the `dark:` variant by class so we can opt-in per layout
+   (dashboard + auth) instead of relying solely on prefers-color-scheme. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Aurora académica — paleta del login/register */
+  --aurora-base: #0b0e2a;
+  --aurora-base-2: #14163e;
+  --aurora-base-3: #1a1d52;
+  --aurora-primary: #7c3aed;
+  --aurora-primary-soft: #a78bfa;
+  --aurora-primary-glow: #c4b5fd;
+  --aurora-cream: #f5f0e1;
+  --aurora-cream-dim: #d8d1bd;
+  --aurora-brass: #fbbf24;
 }
 
 @theme inline {
@@ -10,6 +25,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-space-grotesk);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -23,4 +39,137 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ---- Aurora background (auth pages — full impact) ---- */
+.aurora-shell {
+  background: radial-gradient(
+      1200px 600px at 0% 0%,
+      rgba(124, 58, 237, 0.18),
+      transparent 60%
+    ),
+    radial-gradient(
+      900px 500px at 100% 100%,
+      rgba(196, 181, 253, 0.12),
+      transparent 60%
+    ),
+    linear-gradient(180deg, var(--aurora-base) 0%, var(--aurora-base-2) 100%);
+  color: var(--aurora-cream);
+}
+
+/* ---- Aurora background (dashboard — softer, easier on the eyes) ---- */
+.aurora-app {
+  background:
+    linear-gradient(180deg, #07091d 0%, #0b0e2a 50%, #0d1136 100%);
+  color: var(--aurora-cream);
+}
+
+/* Subtle elevated surface for cards/panels in the dashboard */
+.aurora-surface {
+  background: rgba(20, 22, 62, 0.55);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(196, 181, 253, 0.14);
+}
+
+.aurora-surface-soft {
+  background: rgba(11, 14, 42, 0.55);
+  border: 1px solid rgba(196, 181, 253, 0.1);
+}
+
+.aurora-divider {
+  border-color: rgba(196, 181, 253, 0.14);
+}
+
+.aurora-grid {
+  background-image:
+    linear-gradient(rgba(245, 240, 225, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245, 240, 225, 0.05) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 30%, transparent 80%);
+}
+
+.aurora-display {
+  font-family: var(--font-display), var(--font-geist-sans), Arial, sans-serif;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+}
+
+.aurora-gradient-text {
+  background: linear-gradient(120deg, #c4b5fd 0%, #ddd6fe 35%, #f5f0e1 70%, #fbbf24 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.aurora-pill {
+  background: linear-gradient(
+    90deg,
+    rgba(124, 58, 237, 0.18),
+    rgba(196, 181, 253, 0.08)
+  );
+  border: 1px solid rgba(196, 181, 253, 0.35);
+  box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.15) inset;
+}
+
+.aurora-card {
+  background: linear-gradient(
+    180deg,
+    rgba(20, 22, 62, 0.92) 0%,
+    rgba(11, 14, 42, 0.92) 100%
+  );
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(196, 181, 253, 0.18);
+  box-shadow:
+    0 0 0 1px rgba(124, 58, 237, 0.08) inset,
+    0 24px 60px -20px rgba(0, 0, 0, 0.6),
+    0 0 80px -20px rgba(124, 58, 237, 0.25);
+}
+
+.aurora-input {
+  background: rgba(11, 14, 42, 0.6);
+  border: 1px solid rgba(196, 181, 253, 0.22);
+  color: var(--aurora-cream);
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+.aurora-input::placeholder {
+  color: rgba(216, 209, 189, 0.45);
+}
+.aurora-input:focus-visible {
+  outline: none;
+  border-color: rgba(167, 139, 250, 0.8);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.25);
+}
+
+.aurora-btn-primary {
+  background: linear-gradient(120deg, #7c3aed 0%, #a78bfa 100%);
+  color: #ffffff;
+  box-shadow:
+    0 8px 24px -10px rgba(124, 58, 237, 0.7),
+    0 0 0 1px rgba(196, 181, 253, 0.25) inset;
+  transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
+}
+.aurora-btn-primary:hover {
+  filter: brightness(1.08);
+  box-shadow:
+    0 12px 32px -10px rgba(124, 58, 237, 0.8),
+    0 0 0 1px rgba(196, 181, 253, 0.35) inset;
+}
+.aurora-btn-primary:active {
+  transform: translateY(1px);
+}
+.aurora-btn-primary:disabled {
+  filter: grayscale(0.3) brightness(0.7);
+}
+
+.aurora-btn-ghost {
+  background: transparent;
+  border: 1px solid rgba(196, 181, 253, 0.35);
+  color: var(--aurora-cream);
+  transition: background 150ms ease, border-color 150ms ease;
+}
+.aurora-btn-ghost:hover {
+  background: rgba(124, 58, 237, 0.12);
+  border-color: rgba(196, 181, 253, 0.6);
 }

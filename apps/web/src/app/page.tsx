@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -29,12 +29,12 @@ export default async function Home() {
       <div className="w-full max-w-2xl space-y-8">
         <header className="space-y-2 text-center">
           <p className="text-sm font-medium uppercase tracking-widest text-zinc-500">
-            Sistema KIMY
+            Plataforma Aurelio
           </p>
-          <h1 className="text-4xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+          <h1 className="text-4xl font-semibold tracking-tight text-zinc-900 dark:text-[color:var(--aurora-cream)]">
             Revisión inteligente de tesis
           </h1>
-          <p className="mx-auto max-w-xl text-base text-zinc-600 dark:text-zinc-400">
+          <p className="mx-auto max-w-xl text-base text-zinc-600 dark:text-[color:var(--aurora-cream-dim)]">
             Gestión, evaluación con IA, detección de plagio y validación
             bibliográfica para avances académicos.
           </p>

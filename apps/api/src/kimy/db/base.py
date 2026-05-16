@@ -7,7 +7,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
 class Base(DeclarativeBase):
-    """Declarative base for all KIMY SQLAlchemy models."""
+    """Declarative base for all Aurelio SQLAlchemy models."""
 
 
 class TimestampMixin:

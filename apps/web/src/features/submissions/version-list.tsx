@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge";
+﻿import { Badge } from "@/components/ui/badge";
 import { VersionStatusBadge } from "@/features/submissions/status-badge";
 import type { SubmissionVersionSummary } from "@/lib/api/types";
 
@@ -27,7 +27,7 @@ export function VersionList({
       {versions.map((v) => (
         <li
           key={v.id}
-          className="rounded-md border border-zinc-200 p-3 dark:border-zinc-800"
+          className="rounded-md border border-zinc-200 p-3 dark:border-[color:rgba(196,181,253,0.12)]"
         >
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
@@ -48,7 +48,7 @@ export function VersionList({
                 {new Date(v.created_at).toLocaleString("es-PE")}
               </p>
               {v.comment ? (
-                <p className="mt-2 text-sm text-zinc-700 dark:text-zinc-300">
+                <p className="mt-2 text-sm text-zinc-700 dark:text-[color:var(--aurora-cream-dim)]">
                   {v.comment}
                 </p>
               ) : null}
@@ -62,7 +62,7 @@ export function VersionList({
               href={`${downloadBase}/${v.id}/file`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-medium text-zinc-900 underline-offset-4 hover:underline dark:text-zinc-100"
+              className="text-sm font-medium text-zinc-900 underline-offset-4 hover:underline dark:text-[color:var(--aurora-cream)]"
             >
               Descargar
             </a>

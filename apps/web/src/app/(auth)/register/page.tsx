@@ -1,42 +1,48 @@
 import Link from "next/link";
 
+import { AuthSplit } from "@/features/auth/auth-split";
 import { RegisterForm } from "@/features/auth/register-form";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 export const metadata = {
-  title: "Crear cuenta · KIMY",
+  title: "Crear cuenta · Aurelio",
 };
 
 export default function RegisterPage() {
   return (
-    <Card>
-      <CardHeader className="space-y-1">
-        <p className="text-xs font-medium uppercase tracking-widest text-zinc-500">
-          Sistema KIMY
-        </p>
-        <CardTitle>Crear cuenta</CardTitle>
-        <CardDescription>
-          Regístrate para comenzar a usar KIMY.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <RegisterForm />
-        <p className="text-center text-sm text-zinc-500">
+    <AuthSplit
+      pill="Únete a la plataforma"
+      title={
+        <>
+          UN PASO MÁS <br />
+          <span className="aurora-gradient-text">CERCA</span> DE TU TESIS.
+        </>
+      }
+      description={
+        <>
+          Crea tu cuenta para subir avances, recibir retroalimentación de la IA y trabajar en
+          paralelo con tu asesor. La revisión queda registrada, auditada y disponible para tu
+          jurado.
+        </>
+      }
+      highlights={[
+        { label: "Estructura", value: "APA 7" },
+        { label: "Plagio", value: "pgvector" },
+        { label: "Roles", value: "4" },
+      ]}
+      formTitle="Crear cuenta"
+      formDescription="Selecciona tu rol con cuidado: define qué pantallas verás y qué acciones podrás realizar."
+      formChildren={<RegisterForm />}
+      formFooter={
+        <>
           ¿Ya tienes cuenta?{" "}
           <Link
             href="/login"
-            className="font-medium text-zinc-900 underline-offset-4 hover:underline dark:text-zinc-100"
+            className="font-medium text-[color:var(--aurora-primary-soft)] underline-offset-4 hover:underline"
           >
             Iniciar sesión
           </Link>
-        </p>
-      </CardContent>
-    </Card>
+        </>
+      }
+    />
   );
 }

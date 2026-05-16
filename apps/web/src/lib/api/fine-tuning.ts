@@ -11,7 +11,7 @@ export type FineTuningStats = {
   min_examples_threshold: number;
   ready_to_export: boolean;
   ready_to_submit: boolean;
-  openai_available: boolean;
+  provider_available: boolean;
 };
 
 export type FineTuningStatus =
@@ -39,7 +39,8 @@ export type FineTuningJob = {
 };
 
 export type ModelPreference = {
-  openai_model: string;
+  provider: string;
+  model: string;
   fine_tuned_model: string | null;
   use_fine_tuned: boolean;
 };
@@ -88,7 +89,7 @@ export async function submitJobAction(
   } catch (err) {
     return {
       ok: false,
-      error: extractErrorMessage(err, "No se pudo enviar a OpenAI"),
+      error: extractErrorMessage(err, "No se pudo enviar el dataset"),
     };
   }
 }
@@ -124,6 +125,8 @@ export async function updateModelPreferenceAction(
       { method: "PUT", body: patch },
     );
     revalidatePath("/admin/fine-tuning");
+    revalidatePath("/admin/settings");
+    revalidatePath("/admin");
     return { ok: true, pref };
   } catch (err) {
     return {

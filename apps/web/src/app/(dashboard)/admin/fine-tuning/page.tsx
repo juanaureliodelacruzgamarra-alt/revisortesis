@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -22,7 +22,7 @@ import {
 } from "@/lib/api/fine-tuning";
 import { getCurrentUser } from "@/lib/auth/session";
 
-export const metadata = { title: "Fine-tuning · KIMY" };
+export const metadata = { title: "Fine-tuning · Aurelio" };
 
 function statusVariant(s: FineTuningStatus) {
   switch (s) {
@@ -62,11 +62,11 @@ export default async function FineTuningPage() {
           Administrador
         </p>
         <h1 className="text-3xl font-semibold tracking-tight">Fine-tuning</h1>
-        <p className="text-zinc-600 dark:text-zinc-400">
-          Exporta el feedback humano acumulado como dataset JSONL para
-          fine-tuning de GPT-4o-mini. La submisión real requiere una API key de
-          OpenAI configurada en el backend; el dataset siempre se puede
-          descargar para auditoría o entrenamiento offline.
+        <p className="text-zinc-600 dark:text-[color:var(--aurora-cream-dim)]">
+          Exporta el feedback humano acumulado como dataset JSONL. Con Gemini el
+          envío programático no está cableado (vive en Vertex AI / Gemini
+          Tuning); el dataset siempre se puede descargar para auditoría o
+          entrenamiento offline.
         </p>
       </header>
 
@@ -85,10 +85,10 @@ export default async function FineTuningPage() {
           value={stats.by_action.rejected ?? 0}
         />
         <KpiCard
-          label="OpenAI"
-          value={stats.openai_available ? "Conectado" : "No configurado"}
-          tone={stats.openai_available ? "success" : "warning"}
-          helper="OPENAI_API_KEY en apps/api/.env"
+          label="Tuning programático"
+          value={stats.provider_available ? "Disponible" : "No disponible"}
+          tone={stats.provider_available ? "success" : "warning"}
+          helper="Con Gemini se exporta el JSONL para entrenar offline"
         />
       </section>
 
@@ -106,11 +106,11 @@ export default async function FineTuningPage() {
             disabled={!stats.ready_to_export}
             reason={exportReason}
           />
-          {!stats.ready_to_submit && stats.openai_available ? (
-            <p className="text-xs text-zinc-500">
+          {!stats.ready_to_submit && stats.provider_available ? (
+            <p className="text-xs text-zinc-500 dark:text-[color:var(--aurora-cream-dim)]">
               Estás bajo el umbral sugerido ({stats.total_eligible}/
               {stats.min_examples_threshold}). Puedes exportar igualmente, pero
-              OpenAI puede rechazar datasets muy pequeños.
+              el proveedor puede rechazar datasets muy pequeños.
             </p>
           ) : null}
         </CardContent>
@@ -120,8 +120,8 @@ export default async function FineTuningPage() {
         <CardHeader>
           <CardTitle>Jobs registrados ({jobs.length})</CardTitle>
           <CardDescription>
-            Cada job conserva su JSONL en disco; el ID de OpenAI aparece tras
-            enviar para entrenamiento.
+            Cada job conserva su JSONL en disco. Con Gemini no se envía
+            automáticamente — descarga el archivo para entrenar en Vertex AI.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -134,7 +134,7 @@ export default async function FineTuningPage() {
               {jobs.map((j) => (
                 <li
                   key={j.id}
-                  className="rounded-md border border-zinc-200 p-3 text-sm dark:border-zinc-800"
+                  className="rounded-md border border-zinc-200 p-3 text-sm dark:border-[color:rgba(196,181,253,0.12)]"
                 >
                   <div className="flex flex-wrap items-baseline gap-2">
                     <Badge variant={statusVariant(j.status)}>{j.status}</Badge>
@@ -144,7 +144,7 @@ export default async function FineTuningPage() {
                     </span>
                     {j.openai_job_id ? (
                       <span className="font-mono text-xs text-zinc-500">
-                        OpenAI {j.openai_job_id}
+                        job {j.openai_job_id}
                       </span>
                     ) : null}
                     {j.fine_tuned_model ? (
@@ -171,7 +171,7 @@ export default async function FineTuningPage() {
                   <div className="mt-2">
                     <JobActionButtons
                       job={j}
-                      openaiAvailable={stats.openai_available}
+                      openaiAvailable={stats.provider_available}
                     />
                   </div>
                 </li>
@@ -185,9 +185,9 @@ export default async function FineTuningPage() {
         <CardHeader>
           <CardTitle>Modelo activo (A/B)</CardTitle>
           <CardDescription>
-            Toggle entre el modelo base y un modelo fine-tuneado para todas las
-            evaluaciones IA nuevas. El stub heurístico sigue siendo el fallback
-            si OpenAI/Anthropic no están configurados.
+            Toggle entre el modelo Gemini base y un modelo fine-tuneado para
+            todas las evaluaciones IA nuevas. El stub heurístico sigue siendo el
+            fallback si no hay GEMINI_API_KEY configurada.
           </CardDescription>
         </CardHeader>
         <CardContent>

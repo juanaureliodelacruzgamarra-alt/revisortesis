@@ -14,18 +14,20 @@ class FineTuningStats(BaseModel):
     by_severity: dict[str, int]
     min_examples_threshold: int
     ready_to_export: bool       # True when total_eligible > 0
-    ready_to_submit: bool       # True when total_eligible >= threshold AND OpenAI configured
-    openai_available: bool
+    ready_to_submit: bool       # Always False with Gemini (programmatic tuning not wired)
+    provider_available: bool    # True when programmatic tuning is available for the active provider
 
 
 class ModelPreference(BaseModel):
-    openai_model: str = Field(min_length=1)
+    provider: str = Field(default="gemini", min_length=1)
+    model: str = Field(min_length=1)
     fine_tuned_model: str | None = None
     use_fine_tuned: bool = False
 
 
 class ModelPreferencePatch(BaseModel):
-    openai_model: str | None = None
+    provider: str | None = None
+    model: str | None = None
     fine_tuned_model: str | None = None
     use_fine_tuned: bool | None = None
 

@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 
 import {
   Card,
@@ -12,7 +12,7 @@ import { ProgramRow } from "@/features/programs/program-row";
 import { fetchPrograms } from "@/lib/api/programs";
 import { getCurrentUser } from "@/lib/auth/session";
 
-export const metadata = { title: "Programas · KIMY" };
+export const metadata = { title: "Programas · Aurelio" };
 
 export default async function ProgramsPage() {
   const user = await getCurrentUser();
@@ -28,7 +28,7 @@ export default async function ProgramsPage() {
           Administración
         </p>
         <h1 className="text-3xl font-semibold tracking-tight">Programas académicos</h1>
-        <p className="text-zinc-600 dark:text-zinc-400">
+        <p className="text-zinc-600 dark:text-[color:var(--aurora-cream-dim)]">
           Maestrías, doctorados y pregrados. Cada programa puede tener uno o
           varios documentos patrón asociados.
         </p>

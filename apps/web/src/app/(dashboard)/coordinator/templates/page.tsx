@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 
 import {
   Card,
@@ -13,7 +13,7 @@ import { fetchPrograms } from "@/lib/api/programs";
 import { fetchTemplates } from "@/lib/api/templates";
 import { getCurrentUser } from "@/lib/auth/session";
 
-export const metadata = { title: "Documentos patrón · KIMY" };
+export const metadata = { title: "Documentos patrón · Aurelio" };
 
 export default async function CoordinatorTemplatesPage() {
   const user = await getCurrentUser();
@@ -36,7 +36,7 @@ export default async function CoordinatorTemplatesPage() {
         <h1 className="text-3xl font-semibold tracking-tight">
           Documentos patrón
         </h1>
-        <p className="text-zinc-600 dark:text-zinc-400">
+        <p className="text-zinc-600 dark:text-[color:var(--aurora-cream-dim)]">
           Sube la plantilla institucional (Word o PDF) para cada programa. El
           sistema extrae automáticamente la estructura de secciones.
         </p>

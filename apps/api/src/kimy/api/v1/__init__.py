@@ -10,9 +10,12 @@ from kimy.api.v1.orcid import router as orcid_router
 from kimy.api.v1.plagiarism import router as plagiarism_router
 from kimy.api.v1.programs import router as programs_router
 from kimy.api.v1.push import router as push_router
+from kimy.api.v1.reports import router as reports_router
+from kimy.api.v1.settings import router as settings_router
 from kimy.api.v1.stats import router as stats_router
 from kimy.api.v1.submissions import router as submissions_router
 from kimy.api.v1.templates import router as templates_router
+from kimy.api.v1.users import router as users_router
 
 router = APIRouter(prefix="/api/v1")
 router.include_router(auth_router)
@@ -28,3 +31,6 @@ router.include_router(stats_router)
 router.include_router(fine_tuning_router)
 router.include_router(push_router)
 router.include_router(audit_router)
+router.include_router(users_router)
+router.include_router(settings_router)
+router.include_router(reports_router)

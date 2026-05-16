@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge";
+﻿import { Badge } from "@/components/ui/badge";
 import type { AIEvaluation } from "@/lib/api/types";
 
 function scoreColor(score: number): string {
@@ -28,11 +28,11 @@ export function EvaluationSummary({ evaluation }: { evaluation: AIEvaluation }) 
         <span>{evaluation.duration_ms} ms</span>
       </div>
 
-      <p className="text-sm text-zinc-700 dark:text-zinc-300">
+      <p className="text-sm text-zinc-700 dark:text-[color:var(--aurora-cream-dim)]">
         {evaluation.executive_summary}
       </p>
 
-      <div className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+      <div className="rounded-lg border border-zinc-200 p-4 dark:border-[color:rgba(196,181,253,0.12)]">
         <div className="flex items-baseline justify-between">
           <span className="text-sm font-medium text-zinc-500">
             Cumplimiento total
@@ -43,7 +43,7 @@ export function EvaluationSummary({ evaluation }: { evaluation: AIEvaluation }) 
         </div>
         <div className="mt-1 text-sm text-zinc-500">
           Nota:{" "}
-          <span className="font-mono font-medium text-zinc-900 dark:text-zinc-100">
+          <span className="font-mono font-medium text-zinc-900 dark:text-[color:var(--aurora-cream)]">
             {evaluation.decimal_grade.toFixed(2)} / 20
           </span>
         </div>
@@ -53,7 +53,7 @@ export function EvaluationSummary({ evaluation }: { evaluation: AIEvaluation }) 
         {scores.map((s) => (
           <div
             key={s.label}
-            className="rounded-md border border-zinc-200 p-3 text-center dark:border-zinc-800"
+            className="rounded-md border border-zinc-200 p-3 text-center dark:border-[color:rgba(196,181,253,0.12)]"
           >
             <dt className="text-xs uppercase tracking-wide text-zinc-500">
               {s.label}

@@ -16,7 +16,7 @@ import { fetchTemplate } from "@/lib/api/templates";
 import { PROGRAM_LEVEL_LABELS, TEMPLATE_STATUS_LABELS } from "@/lib/api/types";
 import { getCurrentUser } from "@/lib/auth/session";
 
-export const metadata = { title: "Plantilla · KIMY" };
+export const metadata = { title: "Plantilla · Aurelio" };
 
 export default async function TemplateDetailPage({
   params,
@@ -43,7 +43,7 @@ export default async function TemplateDetailPage({
       <div>
         <Link
           href="/coordinator/templates"
-          className="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
+          className="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-[color:var(--aurora-cream)]"
         >
           ← Volver a documentos patrón
         </Link>
@@ -72,7 +72,7 @@ export default async function TemplateDetailPage({
         <h1 className="text-3xl font-semibold tracking-tight">
           {template.title}
         </h1>
-        <p className="text-zinc-600 dark:text-zinc-400">
+        <p className="text-zinc-600 dark:text-[color:var(--aurora-cream-dim)]">
           {template.description ?? "Sin descripción."}
         </p>
       </header>

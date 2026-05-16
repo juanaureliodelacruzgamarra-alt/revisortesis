@@ -4,9 +4,6 @@ import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import { loginAction, type AuthActionResult } from "@/lib/auth/actions";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 export function LoginForm() {
   const router = useRouter();
@@ -23,38 +20,62 @@ export function LoginForm() {
   }, [state, router]);
 
   return (
-    <form action={formAction} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="email">Correo</Label>
-        <Input
+    <form action={formAction} className="space-y-5">
+      <div className="space-y-1.5">
+        <label
+          htmlFor="email"
+          className="text-xs font-medium uppercase tracking-[0.18em] text-[color:var(--aurora-cream-dim)]"
+        >
+          Correo institucional
+        </label>
+        <input
           id="email"
           name="email"
           type="email"
           placeholder="alumno@unt.edu.pe"
           autoComplete="email"
           required
+          className="aurora-input flex h-11 w-full rounded-md px-3.5 text-sm"
         />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="password">Contraseña</Label>
-        <Input
+
+      <div className="space-y-1.5">
+        <label
+          htmlFor="password"
+          className="text-xs font-medium uppercase tracking-[0.18em] text-[color:var(--aurora-cream-dim)]"
+        >
+          Contraseña
+        </label>
+        <input
           id="password"
           name="password"
           type="password"
           autoComplete="current-password"
           required
+          className="aurora-input flex h-11 w-full rounded-md px-3.5 text-sm"
         />
       </div>
 
       {state && !state.ok ? (
-        <p className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-300">
+        <p className="rounded-md border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-300">
           {state.error}
         </p>
       ) : null}
 
-      <Button type="submit" disabled={pending} className="w-full">
-        {pending ? "Ingresando…" : "Ingresar"}
-      </Button>
+      <button
+        type="submit"
+        disabled={pending}
+        className="aurora-btn-primary flex h-11 w-full items-center justify-center gap-2 rounded-md text-sm font-semibold tracking-wide disabled:cursor-not-allowed"
+      >
+        {pending ? (
+          "Ingresando…"
+        ) : (
+          <>
+            Ingresar
+            <span aria-hidden>→</span>
+          </>
+        )}
+      </button>
     </form>
   );
 }

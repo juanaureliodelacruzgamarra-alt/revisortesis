@@ -47,7 +47,7 @@ export function EvaluationPanel({
         <CardHeader>
           <CardTitle>Resumen ejecutivo</CardTitle>
           <CardDescription>
-            Calificación automatizada KIMY · {evaluation.findings.length}{" "}
+            Calificación automatizada Aurelio · {evaluation.findings.length}{" "}
             hallazgos
           </CardDescription>
         </CardHeader>

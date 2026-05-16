@@ -1,6 +1,7 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -14,7 +15,7 @@ import { StatusDonut } from "@/features/dashboard/status-donut";
 import { fetchStatsActivity, fetchStatsOverview } from "@/lib/api/stats";
 import { getCurrentUser } from "@/lib/auth/session";
 
-export const metadata = { title: "Dashboard · KIMY" };
+export const metadata = { title: "Dashboard · Aurelio" };
 
 function formatPct(v: number | null) {
   return v === null ? "—" : `${v.toFixed(1)}%`;
@@ -37,15 +38,26 @@ export default async function CoordinatorDashboard() {
 
   return (
     <div className="space-y-8">
-      <header className="space-y-1">
-        <p className="text-xs font-medium uppercase tracking-widest text-zinc-500">
-          Coordinador
-        </p>
-        <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
-        <p className="text-zinc-600 dark:text-zinc-400">
-          KPIs agregados de todos los programas. La Fase 9 añadirá revisión por
-          lotes y exportación de reportes consolidados.
-        </p>
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="max-w-2xl space-y-1">
+          <p className="text-xs font-medium uppercase tracking-widest text-zinc-500">
+            Coordinador
+          </p>
+          <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
+          <p className="text-zinc-600 dark:text-[color:var(--aurora-cream-dim)]">
+            KPIs agregados de todos los programas. Descarga el reporte ejecutivo
+            para imprimir o compartir con la dirección de escuela.
+          </p>
+        </div>
+        <Button asChild size="lg">
+          <a
+            href="/api/reports/executive.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Reporte ejecutivo (PDF)
+          </a>
+        </Button>
       </header>
 
       <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -134,7 +146,7 @@ export default async function CoordinatorDashboard() {
                   className="flex items-start justify-between gap-3 py-3 text-sm"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-zinc-900 dark:text-zinc-50">
+                    <p className="truncate font-medium text-zinc-900 dark:text-[color:var(--aurora-cream)]">
                       {a.description}
                     </p>
                     <p className="truncate text-xs text-zinc-500">

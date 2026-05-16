@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -12,7 +12,7 @@ import { LinkOrcidButton } from "@/features/orcid/link-button";
 import { fetchOrcidPublications, fetchOrcidStatus } from "@/lib/api/orcid";
 import { getCurrentUser } from "@/lib/auth/session";
 
-export const metadata = { title: "Mi perfil ORCID · KIMY" };
+export const metadata = { title: "Mi perfil ORCID · Aurelio" };
 
 export default async function AdvisorProfilePage() {
   const user = await getCurrentUser();
@@ -29,7 +29,7 @@ export default async function AdvisorProfilePage() {
           Asesor
         </p>
         <h1 className="text-3xl font-semibold tracking-tight">Mi perfil ORCID</h1>
-        <p className="text-zinc-600 dark:text-zinc-400">
+        <p className="text-zinc-600 dark:text-[color:var(--aurora-cream-dim)]">
           Vincula tu identidad académica con ORCID para que el sistema valide
           automáticamente la afinidad temática con cada avance que supervises.
         </p>
@@ -100,7 +100,7 @@ export default async function AdvisorProfilePage() {
               {publications.map((p) => (
                 <li
                   key={p.id}
-                  className="rounded-md border border-zinc-200 p-3 text-sm dark:border-zinc-800"
+                  className="rounded-md border border-zinc-200 p-3 text-sm dark:border-[color:rgba(196,181,253,0.12)]"
                 >
                   <div className="flex flex-wrap items-baseline gap-2">
                     {p.year ? (
@@ -117,7 +117,7 @@ export default async function AdvisorProfilePage() {
                       </a>
                     ) : null}
                   </div>
-                  <p className="mt-1 font-medium text-zinc-900 dark:text-zinc-100">
+                  <p className="mt-1 font-medium text-zinc-900 dark:text-[color:var(--aurora-cream)]">
                     {p.title}
                   </p>
                   {p.journal ? (
