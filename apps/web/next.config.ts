@@ -48,8 +48,10 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  // Emit a minimal standalone runtime (Dockerfile copies .next/standalone).
-  output: "standalone",
+  // NOTE: "standalone" output is only needed for Docker deployments.
+  // Vercel handles the build pipeline natively — do NOT set output here.
+  // If deploying via Docker, uncomment the line below:
+  // output: "standalone",
   async headers() {
     return [
       {

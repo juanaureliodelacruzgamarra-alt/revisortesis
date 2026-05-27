@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -49,6 +49,23 @@ class Settings(BaseSettings):
 
     storage_backend: str = "local"
     storage_path: str = "./storage"
+
+    @model_validator(mode="after")
+    def _normalize_database_url(self) -> "Settings":
+        """Render injects DATABASE_URL as ``postgresql://…``.  asyncpg needs
+        the ``+asyncpg`` dialect suffix. Rewrite transparently so the app works
+        on both local dev and Render without manual URL editing."""
+        url = self.database_url
+        if url.startswith("postgresql://"):
+            self.database_url = url.replace(
+                "postgresql://", "postgresql+asyncpg://", 1
+            )
+        elif url.startswith("postgres://"):
+            # Legacy Heroku/Render format.
+            self.database_url = url.replace(
+                "postgres://", "postgresql+asyncpg://", 1
+            )
+        return self
 
 
 @lru_cache
