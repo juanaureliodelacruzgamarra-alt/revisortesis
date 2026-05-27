@@ -7,10 +7,14 @@ import { logoutAction } from "@/lib/auth/actions";
 import { ROLE_LABELS, type CurrentUser } from "@/lib/auth/types";
 import { cn } from "@/lib/cn";
 import { NAV_BY_ROLE } from "@/features/dashboard/nav-items";
+import { useTheme } from "@/lib/theme-provider";
+import { useI18n } from "@/lib/i18n-provider";
 
 export function Sidebar({ user }: { user: CurrentUser }) {
   const pathname = usePathname();
   const items = NAV_BY_ROLE[user.role];
+  const { theme, toggle } = useTheme();
+  const { lang, setLang, t } = useI18n();
 
   return (
     <aside className="relative z-10 flex h-screen w-64 flex-col border-r border-[color:rgba(196,181,253,0.12)] bg-[rgba(7,9,29,0.7)] backdrop-blur-xl">
@@ -24,7 +28,7 @@ export function Sidebar({ user }: { user: CurrentUser }) {
           </p>
         </div>
         <p className="mt-1 text-[10px] font-medium uppercase tracking-[0.22em] text-[color:var(--aurora-cream-dim)]">
-          Revisión académica con IA
+          {t("sidebar.title")}
         </p>
       </div>
 
@@ -55,6 +59,25 @@ export function Sidebar({ user }: { user: CurrentUser }) {
         })}
       </nav>
 
+      {/* Theme + Language toggles */}
+      <div className="flex items-center gap-2 border-t border-[color:rgba(196,181,253,0.1)] px-4 py-3">
+        <button
+          onClick={toggle}
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-md border border-[color:rgba(196,181,253,0.25)] bg-[rgba(124,58,237,0.12)] px-2 py-1.5 text-[11px] font-medium uppercase tracking-wider text-[color:var(--aurora-cream-dim)] transition-colors hover:bg-[rgba(124,58,237,0.25)] hover:text-[color:var(--aurora-cream)]"
+          title={theme === "dark" ? t("theme.light") : t("theme.dark")}
+        >
+          {theme === "dark" ? "☀️" : "🌙"}
+          <span>{theme === "dark" ? t("theme.light") : t("theme.dark")}</span>
+        </button>
+        <button
+          onClick={() => setLang(lang === "es" ? "en" : "es")}
+          className="flex items-center justify-center gap-1.5 rounded-md border border-[color:rgba(196,181,253,0.25)] bg-[rgba(124,58,237,0.12)] px-3 py-1.5 text-[11px] font-medium uppercase tracking-wider text-[color:var(--aurora-cream-dim)] transition-colors hover:bg-[rgba(124,58,237,0.25)] hover:text-[color:var(--aurora-cream)]"
+          title={lang === "es" ? "English" : "Español"}
+        >
+          {lang === "es" ? "🇬🇧 EN" : "🇪🇸 ES"}
+        </button>
+      </div>
+
       <div className="border-t border-[color:rgba(196,181,253,0.1)] p-4">
         <p
           className="truncate text-sm font-medium text-[color:var(--aurora-cream)]"
@@ -76,7 +99,7 @@ export function Sidebar({ user }: { user: CurrentUser }) {
             type="submit"
             className="aurora-btn-ghost flex h-9 w-full items-center justify-center rounded-md text-xs font-medium uppercase tracking-widest"
           >
-            Cerrar sesión
+            {t("sidebar.logout")}
           </button>
         </form>
       </div>

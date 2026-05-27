@@ -33,10 +33,23 @@ from kimy.models.ai_finding import (
     FindingType,
     HumanAction,
 )
+from kimy.models.audit_log import AuditLog
 from kimy.models.citation import Citation, CitationStatus
+from kimy.models.document_chunk import EMBEDDING_DIM, DocumentChunk
+from kimy.models.fine_tuning_job import FineTuningJob, FineTuningStatus
+from kimy.models.orcid_publication import OrcidPublication
+from kimy.models.plagiarism_match import PlagiarismMatch, PlagiarismSource, PlagiarismStatus
+from kimy.models.push_token import PushToken
 from kimy.models.student_profile import StudentProfile
 from kimy.models.submission import Submission, SubmissionStatus
 from kimy.models.submission_version import SubmissionVersion, VersionParsingStatus
+from kimy.models.system_setting import (
+    DEFAULT_AI_MODEL_PREFERENCE,
+    DEFAULT_FINE_TUNING_CONFIG,
+    KEY_AI_MODEL_PREFERENCE,
+    KEY_FINE_TUNING_CONFIG,
+    SystemSetting,
+)
 from kimy.models.template_document import TemplateDocument, TemplateParsingStatus
 from kimy.models.user import User, UserRole
 
@@ -593,6 +606,291 @@ async def _seed_submissions(
     await session.commit()
 
 
+# ---------------------------------------------------------------------------
+# ORCID publications for advisors
+# ---------------------------------------------------------------------------
+
+ORCID_PUBS: list[dict[str, Any]] = [
+    {
+        "advisor": "asesor@unt.edu.pe",
+        "orcid_id": "0000-0002-1234-5678",
+        "pubs": [
+            {"put_code": "101", "title": "Automated thesis evaluation using NLP", "year": 2023, "journal": "IEEE Access", "doi": "10.1109/ACCESS.2023.001"},
+            {"put_code": "102", "title": "Plagiarism detection with sentence embeddings", "year": 2022, "journal": "Computers & Education", "doi": "10.1016/j.compedu.2022.555"},
+            {"put_code": "103", "title": "Machine learning for academic document classification", "year": 2021, "journal": "Expert Systems with Applications", "doi": "10.1016/j.eswa.2021.123"},
+        ],
+    },
+    {
+        "advisor": "asesor.maria@unt.edu.pe",
+        "orcid_id": "0000-0003-9876-5432",
+        "pubs": [
+            {"put_code": "201", "title": "Sentiment analysis in academic social networks", "year": 2024, "journal": "Journal of Informetrics", "doi": "10.1016/j.joi.2024.100"},
+            {"put_code": "202", "title": "Biostatistical methods for longitudinal studies", "year": 2023, "journal": "BMC Medical Research", "doi": "10.1186/s12874-023-001"},
+        ],
+    },
+]
+
+
+async def _seed_orcid(session: AsyncSession, users: dict[str, User]) -> None:
+    for entry in ORCID_PUBS:
+        advisor = users[entry["advisor"]]
+        profile = (await session.execute(
+            select(AdvisorProfile).where(AdvisorProfile.user_id == advisor.id)
+        )).scalar_one_or_none()
+        if profile is None:
+            continue
+        profile.orcid_id = entry["orcid_id"]
+        profile.orcid_last_sync = datetime.now(UTC) - timedelta(hours=2)
+        for pub in entry["pubs"]:
+            exists = (await session.execute(
+                select(OrcidPublication).where(
+                    OrcidPublication.advisor_id == advisor.id,
+                    OrcidPublication.put_code == pub["put_code"],
+                )
+            )).scalar_one_or_none()
+            if exists:
+                continue
+            fake_emb = [random.gauss(0, 0.1) for _ in range(EMBEDDING_DIM)]
+            session.add(OrcidPublication(
+                advisor_id=advisor.id,
+                put_code=pub["put_code"],
+                title=pub["title"],
+                year=pub["year"],
+                journal=pub["journal"],
+                doi=pub["doi"],
+                embedding=fake_emb,
+            ))
+        logger.info("orcid pubs seeded for %s", entry["advisor"])
+    await session.commit()
+
+
+# ---------------------------------------------------------------------------
+# Document chunks + plagiarism matches
+# ---------------------------------------------------------------------------
+
+CHUNK_TEXTS = [
+    "La revisión automática de tesis permite identificar deficiencias estructurales y de contenido de forma temprana.",
+    "Los embeddings de oraciones capturan la semántica del texto y permiten comparar similitudes entre documentos.",
+    "El diseño cuasi-experimental se aplicó con un grupo control y un grupo experimental de 30 estudiantes.",
+    "Los resultados muestran una mejora del 25% en la calidad de los avances cuando se usa retroalimentación IA.",
+    "Las conclusiones del estudio confirman la hipótesis principal sobre la eficacia del sistema propuesto.",
+    "La detección de plagio intra-programa utiliza vectores coseno sobre fragmentos de 512 tokens.",
+]
+
+
+async def _seed_chunks_and_plagiarism(session: AsyncSession) -> None:
+    existing = (await session.execute(select(DocumentChunk).limit(1))).scalar_one_or_none()
+    if existing:
+        logger.info("chunks already exist, skipping")
+        return
+
+    versions = (await session.execute(
+        select(SubmissionVersion).order_by(SubmissionVersion.created_at)
+    )).scalars().all()
+    if len(versions) < 2:
+        return
+
+    all_chunks: list[DocumentChunk] = []
+    for ver in versions:
+        for i, text in enumerate(random.sample(CHUNK_TEXTS, k=min(4, len(CHUNK_TEXTS)))):
+            chunk = DocumentChunk(
+                version_id=ver.id,
+                chunk_index=i,
+                section=["Introducción", "Marco teórico", "Metodología", "Resultados"][i % 4],
+                text=text,
+                char_count=len(text),
+                embedding=[random.gauss(0, 0.1) for _ in range(EMBEDDING_DIM)],
+            )
+            session.add(chunk)
+            all_chunks.append(chunk)
+    await session.flush()
+
+    # Create 3 plagiarism matches between different versions
+    ver_chunks: dict[str, list[DocumentChunk]] = {}
+    for c in all_chunks:
+        ver_chunks.setdefault(str(c.version_id), []).append(c)
+
+    ver_ids = list(ver_chunks.keys())
+    match_count = 0
+    for i in range(len(ver_ids)):
+        for j in range(i + 1, len(ver_ids)):
+            if match_count >= 3:
+                break
+            src = ver_chunks[ver_ids[i]][0]
+            tgt = ver_chunks[ver_ids[j]][0]
+            session.add(PlagiarismMatch(
+                version_id=src.version_id,
+                matched_version_id=tgt.version_id,
+                source_chunk_id=src.id,
+                matched_chunk_id=tgt.id,
+                similarity=round(random.uniform(0.75, 0.95), 3),
+                source=PlagiarismSource.intra,
+                status=random.choice([PlagiarismStatus.pending, PlagiarismStatus.confirmed]),
+            ))
+            match_count += 1
+
+    await session.commit()
+    logger.info("chunks (%d) + plagiarism matches (%d) seeded", len(all_chunks), match_count)
+
+
+# ---------------------------------------------------------------------------
+# Fine-tuning jobs
+# ---------------------------------------------------------------------------
+
+async def _seed_fine_tuning(session: AsyncSession, users: dict[str, User]) -> None:
+    existing = (await session.execute(select(FineTuningJob).limit(1))).scalar_one_or_none()
+    if existing:
+        logger.info("fine-tuning jobs exist, skipping")
+        return
+
+    admin = users["admin@unt.edu.pe"]
+    now = datetime.now(UTC)
+    jobs = [
+        FineTuningJob(
+            status=FineTuningStatus.succeeded,
+            dataset_path="fine_tuning/dataset_v1.jsonl",
+            examples_count=523,
+            base_model="gpt-4o-mini-2024-07-18",
+            openai_file_id="file-abc123",
+            openai_job_id="ftjob-xyz789",
+            fine_tuned_model="ft:gpt-4o-mini-2024-07-18:kimy::ABC123",
+            created_by=admin.id,
+            submitted_at=now - timedelta(days=7),
+            finished_at=now - timedelta(days=6, hours=18),
+        ),
+        FineTuningJob(
+            status=FineTuningStatus.running,
+            dataset_path="fine_tuning/dataset_v2.jsonl",
+            examples_count=612,
+            base_model="gpt-4o-mini-2024-07-18",
+            openai_file_id="file-def456",
+            openai_job_id="ftjob-running01",
+            created_by=admin.id,
+            submitted_at=now - timedelta(hours=3),
+        ),
+        FineTuningJob(
+            status=FineTuningStatus.dataset_ready,
+            dataset_path="fine_tuning/dataset_v3.jsonl",
+            examples_count=189,
+            base_model="gpt-4o-mini-2024-07-18",
+            created_by=admin.id,
+        ),
+    ]
+    for j in jobs:
+        session.add(j)
+    await session.commit()
+    logger.info("fine-tuning jobs seeded (%d)", len(jobs))
+
+
+# ---------------------------------------------------------------------------
+# System settings
+# ---------------------------------------------------------------------------
+
+async def _seed_system_settings(session: AsyncSession, users: dict[str, User]) -> None:
+    existing = (await session.execute(
+        select(SystemSetting).where(SystemSetting.key == KEY_AI_MODEL_PREFERENCE)
+    )).scalar_one_or_none()
+    if existing:
+        logger.info("system settings exist, skipping")
+        return
+
+    admin = users["admin@unt.edu.pe"]
+    now = datetime.now(UTC)
+    session.add(SystemSetting(
+        key=KEY_AI_MODEL_PREFERENCE,
+        value=DEFAULT_AI_MODEL_PREFERENCE,
+        updated_at=now,
+        updated_by=admin.id,
+    ))
+    session.add(SystemSetting(
+        key=KEY_FINE_TUNING_CONFIG,
+        value=DEFAULT_FINE_TUNING_CONFIG,
+        updated_at=now,
+        updated_by=admin.id,
+    ))
+    await session.commit()
+    logger.info("system settings seeded")
+
+
+# ---------------------------------------------------------------------------
+# Audit logs
+# ---------------------------------------------------------------------------
+
+AUDIT_ENTRIES = [
+    {"role": "admin", "method": "POST", "path": "/api/programs", "status": 201},
+    {"role": "coordinator", "method": "POST", "path": "/api/templates", "status": 201},
+    {"role": "student", "method": "POST", "path": "/api/submissions", "status": 201},
+    {"role": "student", "method": "POST", "path": "/api/submissions/abc/versions", "status": 201},
+    {"role": "advisor", "method": "PATCH", "path": "/api/findings/xyz/action", "status": 200},
+    {"role": "admin", "method": "PATCH", "path": "/api/users/abc/role", "status": 200},
+    {"role": "coordinator", "method": "POST", "path": "/api/batch/reprocess", "status": 202},
+    {"role": "student", "method": "POST", "path": "/api/submissions", "status": 201},
+    {"role": "advisor", "method": "PATCH", "path": "/api/findings/def/action", "status": 200},
+    {"role": None, "method": "POST", "path": "/api/auth/login", "status": 200},
+    {"role": None, "method": "POST", "path": "/api/auth/login", "status": 401},
+    {"role": "admin", "method": "DELETE", "path": "/api/users/old-user", "status": 204},
+    {"role": "student", "method": "POST", "path": "/api/submissions", "status": 201},
+    {"role": "coordinator", "method": "PATCH", "path": "/api/settings/ai.model_preference", "status": 200},
+    {"role": "advisor", "method": "PATCH", "path": "/api/findings/ghi/action", "status": 200},
+]
+
+
+async def _seed_audit_logs(session: AsyncSession, users: dict[str, User]) -> None:
+    existing = (await session.execute(select(AuditLog).limit(1))).scalar_one_or_none()
+    if existing:
+        logger.info("audit logs exist, skipping")
+        return
+
+    role_user_map = {
+        "admin": users["admin@unt.edu.pe"],
+        "coordinator": users["coordinador@unt.edu.pe"],
+        "advisor": users["asesor@unt.edu.pe"],
+        "student": users["alumno@unt.edu.pe"],
+    }
+    now = datetime.now(UTC)
+    for i, entry in enumerate(AUDIT_ENTRIES):
+        user = role_user_map.get(entry["role"]) if entry["role"] else None
+        session.add(AuditLog(
+            actor_id=user.id if user else None,
+            actor_role=entry["role"],
+            method=entry["method"],
+            path=entry["path"],
+            status_code=entry["status"],
+            duration_ms=random.randint(15, 850),
+            ip=f"192.168.0.{random.randint(2, 50)}",
+            user_agent="Mozilla/5.0 (X11; Linux x86_64) Chrome/125.0",
+        ))
+    await session.commit()
+    logger.info("audit logs seeded (%d)", len(AUDIT_ENTRIES))
+
+
+# ---------------------------------------------------------------------------
+# Push tokens
+# ---------------------------------------------------------------------------
+
+async def _seed_push_tokens(session: AsyncSession, users: dict[str, User]) -> None:
+    existing = (await session.execute(select(PushToken).limit(1))).scalar_one_or_none()
+    if existing:
+        logger.info("push tokens exist, skipping")
+        return
+
+    students = ["alumno@unt.edu.pe", "alumno.luis@unt.edu.pe", "alumno.diana@unt.edu.pe"]
+    for email in students:
+        user = users[email]
+        session.add(PushToken(
+            user_id=user.id,
+            expo_token=f"ExponentPushToken[{uuid4().hex[:22]}]",
+            device_label=f"{user.full_name.split()[0]}'s phone",
+            last_seen=datetime.now(UTC) - timedelta(minutes=random.randint(5, 120)),
+        ))
+    await session.commit()
+    logger.info("push tokens seeded (%d)", len(students))
+
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+
 async def main() -> None:
     random.seed(42)
     async with AsyncSessionLocal() as session:
@@ -602,12 +900,21 @@ async def main() -> None:
         coordinator = users["coordinador@unt.edu.pe"]
         templates = await _ensure_templates(session, programs, coordinator)
         await _seed_submissions(session, users, programs, templates)
+        await _seed_orcid(session, users)
+        await _seed_chunks_and_plagiarism(session)
+        await _seed_fine_tuning(session, users)
+        await _seed_system_settings(session, users)
+        await _seed_audit_logs(session, users)
+        await _seed_push_tokens(session, users)
 
-    logger.info("done. demo seed applied.")
-    logger.info("admin       admin@unt.edu.pe / Admin1234")
-    logger.info("coordinador coordinador@unt.edu.pe / Coord1234")
-    logger.info("asesor      asesor@unt.edu.pe / Asesor1234")
-    logger.info("alumno      alumno@unt.edu.pe / Alumno1234")
+    logger.info("="*60)
+    logger.info("SEED COMPLETO — Credenciales demo:")
+    logger.info("  admin       admin@unt.edu.pe / Admin1234")
+    logger.info("  coordinador coordinador@unt.edu.pe / Coord1234")
+    logger.info("  asesor      asesor@unt.edu.pe / Asesor1234")
+    logger.info("  alumno      alumno@unt.edu.pe / Alumno1234")
+    logger.info("  (otros: alumno.luis, alumno.diana, alumno.kevin, alumno.rosa — pass: Demo1234)")
+    logger.info("="*60)
 
 
 if __name__ == "__main__":

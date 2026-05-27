@@ -173,3 +173,52 @@ body {
   background: rgba(124, 58, 237, 0.12);
   border-color: rgba(196, 181, 253, 0.6);
 }
+
+/* ---- Light mode overrides ---- */
+:root:not(.dark) .aurora-app {
+  background: linear-gradient(180deg, #f8f9fc 0%, #eef0f5 50%, #e8eaf0 100%);
+  color: #1a1a2e;
+}
+
+:root:not(.dark) .aurora-app aside {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border-color: rgba(124, 58, 237, 0.12) !important;
+}
+
+:root:not(.dark) .aurora-app [class*="text-\[color\:var\(--aurora-cream"] {
+  color: #1a1a2e !important;
+}
+
+:root:not(.dark) .aurora-app [class*="text-\[color\:var\(--aurora-cream-dim"] {
+  color: #5a5a7a !important;
+}
+
+:root:not(.dark) .aurora-surface {
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(124, 58, 237, 0.15);
+}
+
+:root:not(.dark) .aurora-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(248,249,252,0.95) 100%);
+  border-color: rgba(124, 58, 237, 0.15);
+  box-shadow: 0 4px 24px -8px rgba(0,0,0,0.08);
+  color: #1a1a2e;
+}
+
+:root:not(.dark) .aurora-input {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(124, 58, 237, 0.2);
+  color: #1a1a2e;
+}
+
+:root:not(.dark) .aurora-btn-ghost {
+  border-color: rgba(124, 58, 237, 0.2);
+  color: #1a1a2e;
+}
+
+:root:not(.dark) .aurora-grid {
+  background-image:
+    linear-gradient(rgba(124, 58, 237, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124, 58, 237, 0.04) 1px, transparent 1px);
+}
+
