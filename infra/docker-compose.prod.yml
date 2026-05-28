@@ -1,0 +1,146 @@
+name: kimy-prod
+
+# ============================================================================
+# Production Docker Compose for KIMY.
+#
+# Differences from infra/docker-compose.yml (dev):
+# - Builds web image from apps/web/Dockerfile (Next.js standalone)
+# - API runs gunicorn-flavored uvicorn with multiple workers
+# - All secrets sourced from .env.prod (NOT versioned — see docs/DEPLOY.md)
+# - Postgres bound to internal network only (no host port exposed)
+# - restart: unless-stopped everywhere
+# - Healthchecks enforced via depends_on.condition
+# - Optional reverse proxy commented out (Traefik / Caddy goes here)
+# ============================================================================
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: kimy-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - kimy-db-data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - kimy-internal
+
+  redis:
+    image: redis:7-alpine
+    container_name: kimy-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - kimy-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - kimy-internal
+
+  api:
+    build:
+      context: ../apps/api
+      dockerfile: Dockerfile
+    image: kimy-api:${IMAGE_TAG:-latest}
+    container_name: kimy-api
+    restart: unless-stopped
+    environment:
+      ENVIRONMENT: production
+      DEBUG: "false"
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      REDIS_URL: redis://redis:6379/0
+      CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:3000"]}
+      JWT_SECRET: ${JWT_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ORCID_CLIENT_ID: ${ORCID_CLIENT_ID:-}
+      ORCID_CLIENT_SECRET: ${ORCID_CLIENT_SECRET:-}
+      ORCID_REDIRECT_URI: ${ORCID_REDIRECT_URI}
+      ORCID_SANDBOX: ${ORCID_SANDBOX:-false}
+      CROSSREF_USER_AGENT: ${CROSSREF_USER_AGENT}
+      STORAGE_BACKEND: local
+      STORAGE_PATH: /app/storage
+      UVICORN_WORKERS: ${UVICORN_WORKERS:-4}
+    volumes:
+      - kimy-storage:/app/storage
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - kimy-internal
+      - kimy-edge
+
+  web:
+    build:
+      context: ../
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    image: kimy-web:${IMAGE_TAG:-latest}
+    container_name: kimy-web
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      NODE_ENV: production
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - kimy-edge
+
+  # ----- Reverse proxy ------------------------------------------------------
+  # Uncomment + configure when ready to terminate TLS in front of API + web.
+  # Recommended: Caddy (auto-HTTPS via Let's Encrypt) or Traefik.
+  #
+  # caddy:
+  #   image: caddy:2-alpine
+  #   container_name: kimy-caddy
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./Caddyfile:/etc/caddy/Caddyfile:ro
+  #     - kimy-caddy-data:/data
+  #     - kimy-caddy-config:/config
+  #   networks:
+  #     - kimy-edge
+  #   depends_on:
+  #     - api
+  #     - web
+
+  # Until the reverse proxy is wired, expose the ports directly. REMOVE these
+  # before going public.
+  api-publish:
+    image: alpine:3
+    container_name: kimy-api-publish
+    profiles: ["dev-publish"]
+    command: ["/bin/sh", "-c", "echo 'Edit docker-compose.prod.yml to publish ports'"]
+
+volumes:
+  kimy-db-data:
+  kimy-redis-data:
+  kimy-storage:
+  kimy-caddy-data:
+  kimy-caddy-config:
+
+networks:
+  kimy-internal:
+    driver: bridge
+    internal: false  # set to true once a reverse proxy fronts everything
+  kimy-edge:
+    driver: bridge

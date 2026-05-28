@@ -1,0 +1,71 @@
+version: 2
+
+# Dependabot reviews dependencies across the monorepo weekly. PRs are grouped
+# by ecosystem and labeled to make triage easy. Set a sensible reviewer limit
+# so we don't drown.
+updates:
+  # ---- Python backend ----
+  - package-ecosystem: "uv"
+    directory: "/apps/api"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "deps"
+      - "api"
+    groups:
+      python-minor:
+        update-types: ["minor", "patch"]
+
+  # ---- Next.js web ----
+  - package-ecosystem: "npm"
+    directory: "/apps/web"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "deps"
+      - "web"
+    groups:
+      web-minor:
+        update-types: ["minor", "patch"]
+
+  # ---- Expo mobile ----
+  - package-ecosystem: "npm"
+    directory: "/apps/mobile"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 3
+    labels:
+      - "deps"
+      - "mobile"
+    # Expo SDK upgrades break things; require manual review.
+    ignore:
+      - dependency-name: "expo"
+      - dependency-name: "react-native"
+    groups:
+      mobile-minor:
+        update-types: ["minor", "patch"]
+
+  # ---- Root tooling ----
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 2
+    labels:
+      - "deps"
+      - "root"
+
+  # ---- GitHub Actions ----
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 2
+    labels:
+      - "deps"
+      - "ci"

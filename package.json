@@ -1,0 +1,30 @@
+{
+  "name": "kimy",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.1.2",
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=11"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "web": "pnpm --filter @kimy/web",
+    "api:dev": "cd apps/api && uv run uvicorn kimy.main:app --reload --host 0.0.0.0 --port 8005",
+    "api:install": "cd apps/api && uv sync",
+    "stack:up": "docker compose -f infra/docker-compose.yml up -d",
+    "stack:down": "docker compose -f infra/docker-compose.yml down",
+    "stack:logs": "docker compose -f infra/docker-compose.yml logs -f"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "^19.2.0"
+    }
+  }
+}
