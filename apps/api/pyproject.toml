@@ -5,7 +5,7 @@ description = "KIMY backend API — thesis review with AI, plagiarism detection 
 requires-python = ">=3.12"
 dependencies = [
     # Core web framework
-    "fastapi>=0.115.0",
+    "fastapi>=0.136.3",
     "uvicorn[standard]>=0.32.0",
     "pydantic>=2.9.0",
     "pydantic-settings>=2.6.0",
@@ -14,18 +14,18 @@ dependencies = [
     "asyncpg>=0.30.0",
     "alembic>=1.14.0",
     "pgvector>=0.3.6",
-    "greenlet>=3.1.0",
+    "greenlet>=3.5.1",
     # Auth & crypto
     "argon2-cffi>=23.1.0",
-    "pyjwt>=2.10.0",
+    "pyjwt>=2.13.0",
     "cryptography>=44.0.0",
     "email-validator>=2.2.0",
     # HTTP client (CrossRef, ORCID, AI providers)
     "httpx>=0.28.0",
     # Document parsing
     "python-docx>=1.1.2",
-    "pypdf>=5.1.0",
-    "python-multipart>=0.0.20",
+    "pypdf>=6.12.2",
+    "python-multipart>=0.0.29",
     # PDF generation (acta de revisión)
     "reportlab>=4.2.0",
     # Rate limiting (Fase 12)
@@ -40,20 +40,20 @@ workers = [
     "redis>=5.2.0",
 ]
 ai = [
-    "google-genai>=0.7.0",
-    "openai>=1.55.0",     # legacy — kept for backward-compat / experiments
-    "anthropic>=0.40.0",  # legacy fallback path
-    "langchain>=0.3.0",
-    "llama-index>=0.12.0",
-    "tiktoken>=0.8.0",
+    "google-genai>=2.6.0",
+    "openai>=2.38.0",     # legacy — kept for backward-compat / experiments
+    "anthropic>=0.104.1",  # legacy fallback path
+    "langchain>=1.3.2",
+    "llama-index>=0.14.22",
+    "tiktoken>=0.13.0",
 ]
 
 [dependency-groups]
 dev = [
     "pytest>=8.3.0",
-    "pytest-asyncio>=0.24.0",
+    "pytest-asyncio>=1.4.0",
     "aiosqlite>=0.20.0",
-    "ruff>=0.8.0",
+    "ruff>=0.15.14",
 ]
 
 [build-system]
