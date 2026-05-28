@@ -27,9 +27,9 @@ function estimatedAIPercent(evaluation: AIEvaluation): number {
   return Math.max(0, Math.min(100, base + jitter));
 }
 
-function estimateRef(id: string): string {
+function copyleaksScanId(id: string): string {
   const seed = hashSeed(id).toString(16).toUpperCase().padStart(8, "0");
-  return `KIMY-${seed.slice(0, 4)}-${seed.slice(4, 8)}`;
+  return `CL-${seed.slice(0, 4)}-${seed.slice(4, 8)}`;
 }
 
 export function EvaluationSummary({ evaluation }: { evaluation: AIEvaluation }) {
@@ -42,7 +42,7 @@ export function EvaluationSummary({ evaluation }: { evaluation: AIEvaluation }) 
 
   const aiPct = estimatedAIPercent(evaluation);
   const humanPct = 100 - aiPct;
-  const estimateId = estimateRef(evaluation.id);
+  const scanId = copyleaksScanId(evaluation.id);
 
   return (
     <div className="space-y-4">
@@ -81,25 +81,30 @@ export function EvaluationSummary({ evaluation }: { evaluation: AIEvaluation }) 
       <div className="rounded-lg border border-zinc-200 bg-gradient-to-br from-white to-zinc-50 p-4 dark:border-[color:rgba(196,181,253,0.12)] dark:from-[color:rgba(30,27,45,0.6)] dark:to-[color:rgba(30,27,45,0.3)]">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-zinc-700 text-[10px] font-bold text-white dark:bg-[color:rgba(196,181,253,0.2)]">
-              IA
+            <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-[#0ea5e9] text-[10px] font-bold text-white">
+              CL
             </span>
             <div className="flex flex-col">
               <span className="text-sm font-semibold text-zinc-800 dark:text-[color:var(--aurora-cream)]">
-                Detección de contenido IA
+                Copyleaks AI Detector
               </span>
               <span className="text-[10px] uppercase tracking-wide text-zinc-400">
-                Ref {estimateId}
+                Scan {scanId}
               </span>
             </div>
           </div>
-          <Badge variant="muted">estimación</Badge>
+          <div className="flex items-center gap-1.5">
+            <Badge variant="muted">v4.2</Badge>
+            <span className="inline-flex items-center rounded-md border border-amber-400 bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:border-amber-500 dark:bg-amber-900/40 dark:text-amber-300">
+              DEMO
+            </span>
+          </div>
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-4">
           <div>
             <div className="text-xs uppercase tracking-wide text-zinc-500">
-              Contenido IA (est.)
+              AI Content
             </div>
             <div className={`mt-1 text-3xl font-semibold ${aiDetectionColor(aiPct)}`}>
               {aiPct.toFixed(1)}%
@@ -107,7 +112,7 @@ export function EvaluationSummary({ evaluation }: { evaluation: AIEvaluation }) 
           </div>
           <div>
             <div className="text-xs uppercase tracking-wide text-zinc-500">
-              Contenido humano (est.)
+              Human Content
             </div>
             <div className="mt-1 text-3xl font-semibold text-zinc-700 dark:text-[color:var(--aurora-cream-dim)]">
               {humanPct.toFixed(1)}%
@@ -122,8 +127,8 @@ export function EvaluationSummary({ evaluation }: { evaluation: AIEvaluation }) 
           />
         </div>
 
-        <p className="mt-2 text-[10px] leading-snug text-zinc-400">
-          Estimación heurística KIMY derivada del puntaje de originalidad. No reemplaza un escaneo de servicio externo (Turnitin, Copyleaks, etc.).
+        <p className="mt-2 text-[10px] leading-snug text-amber-600 dark:text-amber-400">
+          Vista de demostración. Valor estimado a partir del puntaje de originalidad; no proviene de una integración real con Copyleaks.
         </p>
       </div>
 
