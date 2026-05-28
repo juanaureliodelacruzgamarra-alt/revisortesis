@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -17,10 +17,10 @@ export function SubmissionRow({
   showStudent?: boolean;
 }) {
   return (
-    <li className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-[color:rgba(196,181,253,0.12)] dark:bg-[rgba(11,14,42,0.55)]">
-      <div className="flex items-start justify-between gap-3">
+    <li className="rounded-lg border border-zinc-200 bg-white p-3 dark:border-[color:rgba(196,181,253,0.12)] dark:bg-[rgba(11,14,42,0.55)] sm:p-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             <SubmissionStatusBadge status={submission.status} />
             {submission.latest_version_status ? (
               <VersionStatusBadge status={submission.latest_version_status} />
@@ -43,12 +43,12 @@ export function SubmissionRow({
           </div>
           <Link
             href={`${basePath}/${submission.id}`}
-            className="mt-2 block truncate text-base font-medium hover:underline"
+            className="mt-2 block truncate text-sm font-medium text-zinc-900 hover:underline dark:text-[color:var(--aurora-cream)] sm:text-base"
             title={submission.title}
           >
             {submission.title}
             {submission.chapter ? (
-              <span className="ml-2 text-sm font-normal text-zinc-500">
+              <span className="ml-2 text-xs font-normal text-zinc-500 sm:text-sm">
                 · {submission.chapter}
               </span>
             ) : null}
@@ -59,7 +59,6 @@ export function SubmissionRow({
             </p>
           ) : (
             <p className="text-xs text-zinc-500">
-              Creado{" "}
               {new Date(submission.created_at).toLocaleDateString("es-PE")}
             </p>
           )}

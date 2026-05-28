@@ -4,20 +4,14 @@ import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import { registerAction, type AuthActionResult } from "@/lib/auth/actions";
-import { ROLE_LABELS, type UserRole } from "@/lib/auth/types";
+import { type UserRole } from "@/lib/auth/types";
+import { useI18n } from "@/lib/i18n-provider";
 
 const ROLE_OPTIONS: UserRole[] = ["student", "advisor", "coordinator"];
 
-function fieldLabel(text: string) {
-  return (
-    <span className="text-xs font-medium uppercase tracking-[0.18em] text-[color:var(--aurora-cream-dim)]">
-      {text}
-    </span>
-  );
-}
-
 export function RegisterForm() {
   const router = useRouter();
+  const { t } = useI18n();
   const [state, formAction, pending] = useActionState<
     AuthActionResult | null,
     FormData
@@ -33,7 +27,11 @@ export function RegisterForm() {
   return (
     <form action={formAction} className="space-y-5">
       <div className="space-y-1.5">
-        <label htmlFor="full_name">{fieldLabel("Nombre completo")}</label>
+        <label htmlFor="full_name">
+          <span className="text-xs font-medium uppercase tracking-[0.18em] text-[color:var(--aurora-cream-dim)]">
+            {t("auth.full_name")}
+          </span>
+        </label>
         <input
           id="full_name"
           name="full_name"
@@ -46,7 +44,11 @@ export function RegisterForm() {
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor="email">{fieldLabel("Correo institucional")}</label>
+        <label htmlFor="email">
+          <span className="text-xs font-medium uppercase tracking-[0.18em] text-[color:var(--aurora-cream-dim)]">
+            {t("auth.email_label")}
+          </span>
+        </label>
         <input
           id="email"
           name="email"
@@ -59,7 +61,11 @@ export function RegisterForm() {
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor="password">{fieldLabel("Contraseña")}</label>
+        <label htmlFor="password">
+          <span className="text-xs font-medium uppercase tracking-[0.18em] text-[color:var(--aurora-cream-dim)]">
+            {t("auth.password_label")}
+          </span>
+        </label>
         <input
           id="password"
           name="password"
@@ -70,12 +76,16 @@ export function RegisterForm() {
           className="aurora-input flex h-11 w-full rounded-md px-3.5 text-sm"
         />
         <p className="text-xs text-[color:var(--aurora-cream-dim)]">
-          Mínimo 8 caracteres.
+          {t("auth.min_chars")}
         </p>
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor="role">{fieldLabel("Rol")}</label>
+        <label htmlFor="role">
+          <span className="text-xs font-medium uppercase tracking-[0.18em] text-[color:var(--aurora-cream-dim)]">
+            {t("auth.role")}
+          </span>
+        </label>
         <select
           id="role"
           name="role"
@@ -88,7 +98,7 @@ export function RegisterForm() {
               value={role}
               className="bg-[color:var(--aurora-base-2)] text-[color:var(--aurora-cream)]"
             >
-              {ROLE_LABELS[role]}
+              {t(`role.${role}`)}
             </option>
           ))}
         </select>
@@ -106,10 +116,10 @@ export function RegisterForm() {
         className="aurora-btn-primary flex h-11 w-full items-center justify-center gap-2 rounded-md text-sm font-semibold tracking-wide disabled:cursor-not-allowed"
       >
         {pending ? (
-          "Creando cuenta…"
+          t("auth.register_pending")
         ) : (
           <>
-            Crear cuenta
+            {t("auth.register_btn")}
             <span aria-hidden>→</span>
           </>
         )}

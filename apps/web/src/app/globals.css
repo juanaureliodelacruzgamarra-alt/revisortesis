@@ -18,6 +18,24 @@
   --aurora-cream: #f5f0e1;
   --aurora-cream-dim: #d8d1bd;
   --aurora-brass: #fbbf24;
+
+  /* ---- Light-mode semantic tokens ---- */
+  --aurora-text: #1a1a2e;
+  --aurora-text-muted: #5a5a7a;
+  --aurora-surface-bg: rgba(255, 255, 255, 0.75);
+  --aurora-surface-border: rgba(124, 58, 237, 0.15);
+  --aurora-sidebar-bg: rgba(255, 255, 255, 0.92);
+  --aurora-sidebar-border: rgba(124, 58, 237, 0.12);
+  --aurora-app-bg: linear-gradient(180deg, #f8f9fc 0%, #eef0f5 50%, #e8eaf0 100%);
+}
+
+.dark {
+  --aurora-text: var(--aurora-cream);
+  --aurora-text-muted: var(--aurora-cream-dim);
+  --aurora-surface-bg: rgba(20, 22, 62, 0.55);
+  --aurora-surface-border: rgba(196, 181, 253, 0.14);
+  --aurora-sidebar-bg: rgba(7, 9, 29, 0.7);
+  --aurora-sidebar-border: rgba(196, 181, 253, 0.12);
 }
 
 @theme inline {
@@ -174,28 +192,96 @@ body {
   border-color: rgba(196, 181, 253, 0.6);
 }
 
-/* ---- Light mode overrides ---- */
+/* ===================================================================
+   LIGHT MODE — complete overrides
+   =================================================================== */
+
 :root:not(.dark) .aurora-app {
   background: linear-gradient(180deg, #f8f9fc 0%, #eef0f5 50%, #e8eaf0 100%);
   color: #1a1a2e;
 }
 
-:root:not(.dark) .aurora-app aside {
-  background: rgba(255, 255, 255, 0.85) !important;
+/* ---- Sidebar ---- */
+:root:not(.dark) .aurora-sidebar {
+  background: rgba(255, 255, 255, 0.92) !important;
   border-color: rgba(124, 58, 237, 0.12) !important;
 }
 
-:root:not(.dark) .aurora-app [class*="text-\[color\:var\(--aurora-cream"] {
-  color: #1a1a2e !important;
+:root:not(.dark) .aurora-sidebar .sidebar-brand {
+  color: #1a1a2e;
 }
 
-:root:not(.dark) .aurora-app [class*="text-\[color\:var\(--aurora-cream-dim"] {
-  color: #5a5a7a !important;
+:root:not(.dark) .aurora-sidebar .sidebar-subtitle {
+  color: #5a5a7a;
 }
 
+:root:not(.dark) .aurora-sidebar .sidebar-divider {
+  border-color: rgba(124, 58, 237, 0.1);
+}
+
+:root:not(.dark) .aurora-sidebar .sidebar-nav-link {
+  color: #5a5a7a;
+}
+
+:root:not(.dark) .aurora-sidebar .sidebar-nav-link:hover {
+  background: rgba(124, 58, 237, 0.08);
+  color: #1a1a2e;
+}
+
+:root:not(.dark) .aurora-sidebar .sidebar-nav-link-active {
+  background: linear-gradient(to right, rgba(124, 58, 237, 0.12), rgba(124, 58, 237, 0.04));
+  color: #7c3aed;
+  box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.2) inset;
+}
+
+:root:not(.dark) .aurora-sidebar .sidebar-user-name {
+  color: #1a1a2e;
+}
+
+:root:not(.dark) .aurora-sidebar .sidebar-user-email {
+  color: #5a5a7a;
+}
+
+:root:not(.dark) .aurora-sidebar .sidebar-role-badge {
+  border-color: rgba(124, 58, 237, 0.2);
+  background: rgba(124, 58, 237, 0.08);
+  color: #7c3aed;
+}
+
+:root:not(.dark) .aurora-sidebar .sidebar-toggle-btn {
+  border-color: rgba(124, 58, 237, 0.2);
+  background: rgba(124, 58, 237, 0.06);
+  color: #5a5a7a;
+}
+
+:root:not(.dark) .aurora-sidebar .sidebar-toggle-btn:hover {
+  background: rgba(124, 58, 237, 0.12);
+  color: #1a1a2e;
+}
+
+/* ---- Dashboard page content ---- */
+:root:not(.dark) .aurora-app .aurora-page-header-role {
+  color: #7c3aed;
+}
+
+:root:not(.dark) .aurora-app .aurora-page-title {
+  color: #1a1a2e;
+}
+
+:root:not(.dark) .aurora-app .aurora-page-desc {
+  color: #5a5a7a;
+}
+
+/* ---- Surfaces & Cards ---- */
 :root:not(.dark) .aurora-surface {
   background: rgba(255, 255, 255, 0.75);
-  border-color: rgba(124, 58, 237, 0.15);
+  border-color: rgba(124, 58, 237, 0.12);
+  backdrop-filter: none;
+}
+
+:root:not(.dark) .aurora-surface-soft {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(124, 58, 237, 0.08);
 }
 
 :root:not(.dark) .aurora-card {
@@ -211,9 +297,18 @@ body {
   color: #1a1a2e;
 }
 
+:root:not(.dark) .aurora-input::placeholder {
+  color: #9ca3af;
+}
+
 :root:not(.dark) .aurora-btn-ghost {
   border-color: rgba(124, 58, 237, 0.2);
   color: #1a1a2e;
+}
+
+:root:not(.dark) .aurora-btn-ghost:hover {
+  background: rgba(124, 58, 237, 0.08);
+  border-color: rgba(124, 58, 237, 0.35);
 }
 
 :root:not(.dark) .aurora-grid {
@@ -222,3 +317,26 @@ body {
     linear-gradient(90deg, rgba(124, 58, 237, 0.04) 1px, transparent 1px);
 }
 
+:root:not(.dark) .aurora-divider {
+  border-color: rgba(124, 58, 237, 0.1);
+}
+
+:root:not(.dark) .aurora-pill {
+  background: linear-gradient(90deg, rgba(124, 58, 237, 0.1), rgba(124, 58, 237, 0.04));
+  border-color: rgba(124, 58, 237, 0.25);
+}
+
+/* ---- Gradient glow blobs (hide in light mode) ---- */
+:root:not(.dark) .aurora-glow-blob {
+  opacity: 0;
+}
+
+/* ---- Mobile sidebar overlay ---- */
+.sidebar-overlay {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+:root:not(.dark) .sidebar-overlay {
+  background: rgba(0, 0, 0, 0.25);
+}

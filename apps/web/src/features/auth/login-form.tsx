@@ -4,9 +4,11 @@ import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import { loginAction, type AuthActionResult } from "@/lib/auth/actions";
+import { useI18n } from "@/lib/i18n-provider";
 
 export function LoginForm() {
   const router = useRouter();
+  const { t } = useI18n();
   const [state, formAction, pending] = useActionState<
     AuthActionResult | null,
     FormData
@@ -26,7 +28,7 @@ export function LoginForm() {
           htmlFor="email"
           className="text-xs font-medium uppercase tracking-[0.18em] text-[color:var(--aurora-cream-dim)]"
         >
-          Correo institucional
+          {t("auth.email_label")}
         </label>
         <input
           id="email"
@@ -44,7 +46,7 @@ export function LoginForm() {
           htmlFor="password"
           className="text-xs font-medium uppercase tracking-[0.18em] text-[color:var(--aurora-cream-dim)]"
         >
-          Contraseña
+          {t("auth.password_label")}
         </label>
         <input
           id="password"
@@ -68,10 +70,10 @@ export function LoginForm() {
         className="aurora-btn-primary flex h-11 w-full items-center justify-center gap-2 rounded-md text-sm font-semibold tracking-wide disabled:cursor-not-allowed"
       >
         {pending ? (
-          "Ingresando…"
+          t("auth.login_pending")
         ) : (
           <>
-            Ingresar
+            {t("auth.login_btn")}
             <span aria-hidden>→</span>
           </>
         )}
