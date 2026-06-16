@@ -36,7 +36,7 @@ dependencies = [
 
 [project.optional-dependencies]
 workers = [
-    "celery[redis]>=5.4.0",
+    "celery[redis]>=5.6.3",
     "redis>=5.2.0",
 ]
 ai = [
